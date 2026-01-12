@@ -1,5 +1,5 @@
 # Kamohara Electric Railway Automatic Broadcas
-![Latest Release](https://img.shields.io/github/v/release/ユーザー名/リポジトリ名?color=blue)
+![Latest Release](https://img.shields.io/github/v/release/WhiteJapan/kamohara-broadcasting-system?color=blue)
 
 かもげんの自動放送をできます
 
