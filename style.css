@@ -1,0 +1,149 @@
+:root {
+    --bg: #0b0e14;
+    --panel: #1c1f26;
+    --accent: #0078d4;
+    --lcd-bg: #000;
+    --lcd-txt: #ffcc00;
+    --danger: #ff4444;
+}
+
+/* 画面全体の固定設定 */
+body { 
+    background: var(--bg); 
+    color: #e0e0e0; 
+    font-family: sans-serif; 
+    margin: 0; 
+    padding: 10px; 
+    overflow: hidden; 
+    height: 100vh;
+    box-sizing: border-box;
+}
+
+/* レイアウト構造 */
+.header { 
+    display: flex; 
+    justify-content: space-between; 
+    border-bottom: 2px solid var(--accent); 
+    padding: 5px 15px; 
+    height: 40px; 
+    align-items: center; 
+}
+.main-layout { 
+    display: grid; 
+    grid-template-columns: 380px 1fr 300px; /* 左を少し広げたよ */
+    gap: 10px; 
+    height: calc(100vh - 80px); 
+    margin-top: 10px;
+}
+
+/* パネル基本設定 */
+.panel { 
+    background: var(--panel); 
+    border: 1px solid #333; 
+    padding: 12px; 
+    border-radius: 4px; 
+    display: flex; 
+    flex-direction: column; 
+    overflow: hidden; 
+}
+.panel-title { 
+    margin: 0 0 10px 0; 
+    font-size: 14px; 
+    color: var(--accent); 
+    border-left: 4px solid var(--accent); 
+    padding-left: 8px; 
+}
+
+/* スクロールエリア */
+.scroll-v { 
+    overflow-y: auto; 
+    flex: 1; 
+    padding-right: 8px; 
+}
+
+/* 独自スクロールバー */
+.scroll-v::-webkit-scrollbar { width: 8px; }
+.scroll-v::-webkit-scrollbar-track { background: #111; border-radius: 10px; }
+.scroll-v::-webkit-scrollbar-thumb { background: #444; border-radius: 10px; border: 2px solid #111; }
+.scroll-v::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+.scroll-v { scrollbar-width: thin; scrollbar-color: #444 #111; }
+
+/* ボタン共通デザイン */
+button {
+    background: #1c1f26;
+    color: #fff;
+    border: 1px solid #444;
+    border-bottom: 3px solid #444;
+    padding: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 13px;
+    border-radius: 4px;
+    transition: 0.1s;
+    outline: none;
+    box-sizing: border-box;
+}
+button:active { transform: translateY(2px); border-bottom-width: 1px; }
+
+/* 左側：Builder用グリッド（ここで隙間を空けたよ） */
+.btn-grid-small {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px; /* ★右側と同じように隙間を確保 */
+    margin: 10px 0 20px 0;
+}
+
+/* 右側：EF用縦並びコンテナ */
+.ef-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* ★ここも10pxで統一 */
+}
+.ef-container button {
+    text-align: left;
+    padding: 12px;
+}
+
+/* 中央：運行リスト */
+.station-row {
+    display: flex;
+    align-items: center;
+    background: #2a2f3a;
+    padding: 10px 15px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    border-left: 4px solid #444;
+}
+.st-name-area { flex: 1; font-weight: bold; font-size: 16px; text-align: left; }
+.st-btn-group { display: flex; gap: 8px; }
+.st-btn-group button { width: 90px; height: 45px; }
+
+/* 色分け設定 */
+.btn-play { border-color: #107c10; color: #107c10; border-bottom-color: #107c10 !important; }
+.btn-util { border-color: #888; color: #ccc; border-bottom-color: #888 !important; }
+.btn-next { border-color: var(--accent); color: var(--accent); border-bottom-color: var(--accent) !important; }
+.btn-soon { border-color: var(--danger); color: var(--danger); border-bottom-color: var(--danger) !important; }
+
+/* HI設定表 */
+.master-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 15px; }
+.master-table th { position: sticky; top: 0; background: var(--panel); padding: 10px 0; border-bottom: 1px solid #333; color: var(--accent); z-index: 5; }
+.master-table td { padding: 10px 0; border-bottom: 1px solid #2a2a2a; text-align: center; }
+
+/* 自作スイッチ */
+.custom-chk { display: inline-flex; justify-content: center; cursor: pointer; }
+.custom-chk input { display: none; }
+.checkmark { display: block; width: 36px; height: 18px; background: #222; border-radius: 4px; border: 1px solid #444; position: relative; }
+.checkmark::after { content: ""; position: absolute; top: 2px; left: 2px; width: 14px; height: 12px; background: #555; border-radius: 2px; transition: 0.2s; }
+input:checked + .stop-sw { background: #004a80; box-shadow: 0 0 8px var(--accent); }
+input:checked + .term-sw { background: #7a1d1d; box-shadow: 0 0 8px var(--danger); }
+input:checked + .checkmark::after { left: 18px; background: #fff; }
+
+/* LCDとビルダー表示 */
+.lcd { background: var(--lcd-bg); color: var(--lcd-txt); padding: 12px; font-family: monospace; border: 1px solid #444; margin-bottom: 10px; min-height: 1.2em; border-radius: 4px; font-size: 14px; }
+.build-item { cursor: pointer; margin-right: 4px; display: inline-block; }
+.build-item:hover { color: var(--danger); text-decoration: line-through; }
+
+.builder-controls { display: flex; gap: 8px; margin-bottom: 15px; }
+.category-label { font-weight: bold; color: var(--accent); margin: 15px 0 5px 0; font-size: 13px; }
+.item-label { font-size: 12px; color: #aaa; margin: 10px 0 5px 0; }
+.term-label { background: var(--danger); font-size: 10px; padding: 2px 5px; margin-left: 8px; border-radius: 3px; color: white; }
