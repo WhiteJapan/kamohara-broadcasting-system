@@ -35,7 +35,7 @@ const DB = {
         { id: "015", txt: "途中の停車..." },
         { id: "016", txt: "終点..." },
         { id: "017", txt: "の順に停車..." },
-        { id: "017", txt: "各駅に停車" }
+        { id: "093", txt: "各駅に停車" }
     ],
     HI: [
         { name: "三田", next: "034", soon: "035", canBeTerm: true },
@@ -215,4 +215,5 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('playBtn').onclick = () => buildQueue.length && playQueue(buildQueue.map(i => i.id));
     document.getElementById('clearBtn').onclick = () => { buildQueue = []; updateBuilderDisplay(); };
     setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
+
 });
