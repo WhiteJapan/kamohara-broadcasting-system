@@ -1,0 +1,66 @@
+:root {
+    --bg-color: #1a1a1a;
+    --card-bg: #2d2d2d;
+    --text-color: #eeeeee;
+    --border-color: #444444;
+    --kr-blue: #002874;
+}
+
+body {
+    background: var(--bg-color);
+    color: var(--text-color);
+    font-family: sans-serif;
+    padding: 20px;
+    margin: 0;
+}
+
+.header { margin-bottom: 20px; }
+
+/* 緑の縦棒から鴨原ブルーの縦棒に変更 */
+.title-with-bar {
+    border-left: 8px solid #28a745; /* 画像に合わせて一旦緑に、お好みで --kr-blue に変えてくれ */
+    padding-left: 15px;
+    font-size: 1.8em;
+}
+
+#queue-section {
+    background: #000;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border: 2px solid var(--border-color);
+    min-height: 60px;
+}
+
+.queue-item {
+    display: inline-block;
+    background: #333;
+    color: #fff;
+    padding: 5px 12px;
+    margin: 5px;
+    border-radius: 4px;
+    border: 1px solid #444;
+}
+
+.controls { display: flex; gap: 10px; margin-bottom: 30px; }
+.main-btn { padding: 12px 24px; font-weight: bold; border-radius: 6px; cursor: pointer; border: none; font-size: 16px; }
+.play { background: #28a745; color: white; }
+.play.stop { background: #ff4757 !important; }
+.undo { background: #ffc107; color: black; }
+.clear { background: #dc3545; color: white; }
+
+.container { display: flex; flex-wrap: wrap; gap: 15px; }
+.category-box { background: var(--card-bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); flex: 1; min-width: 300px; }
+.category-title { color: #ffc107; margin-bottom: 10px; font-weight: bold; border-bottom: 1px solid #444; padding-bottom: 5px; }
+
+.part-btn {
+    background: #444;
+    color: white;
+    border: 1px solid #555;
+    padding: 10px 15px;
+    margin: 4px;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 14px;
+}
+.part-btn:hover { background: var(--kr-blue); }

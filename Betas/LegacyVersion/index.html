@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>鴨原電鉄放送シミュレーター</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="header">
+        <h1 class="title-with-bar">自動放送シミュレーター</h1>
+    </div>
+
+    <div id="queue-section">
+        <div id="queue-list">パーツを選択してください...</div>
+    </div>
+
+    <div class="controls">
+        <button class="main-btn play" id="playBtn">▶ 放送再生</button>
+        <button class="main-btn undo" id="undoBtn">1つ戻す</button>
+        <button class="main-btn clear" id="clearBtn">全クリア</button>
+    </div>
+
+    <div class="container" id="parts-container"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
