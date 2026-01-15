@@ -1,6 +1,6 @@
 const DB = {
     STATIONS: [
-        { id: "018", txt: "長町..各駅" }, 
+        { id: "018", txt: "長町..各駅" },
         { id: "019", txt: "長町から各駅" },
         { id: "020", txt: "三田" },
         { id: "021", txt: "横河" },
@@ -35,7 +35,7 @@ const DB = {
         { id: "015", txt: "途中の停車..." },
         { id: "016", txt: "終点..." },
         { id: "017", txt: "の順に停車..." },
-        { id: "093", txt: "各駅に停車" }
+        { id: "017", txt: "各駅に停車" }
     ],
     HI: [
         { name: "三田", next: "034", soon: "035", canBeTerm: true },
@@ -54,8 +54,10 @@ const DB = {
         { name: "山栄", next: "068", soon: "069", canBeTerm: true }
     ],
     EF: [
-        { id: "072", txt: "出口,右" }, 
-        { id: "073", txt: "出口,左" }, 
+        { id: "072", txt: "出口,右" },
+        { id: "073", txt: "出口,左" },
+        { id: "094", txt: "ドア閉扉" },
+        { id: "095", txt: "手を離せ！" },
         { id: "092", txt: "乗り換え" },
         { id: "074", txt: "優先席" },
         { id: "075", txt: "優先席付近" },
@@ -69,7 +71,7 @@ const DB = {
         { id: "083", txt: "運転中止" },
         { id: "084", txt: "当駅止まり" },
         { id: "085", txt: "運転再開目処なし" },
-        { id: "086", txt: "乗り降り" }, 
+        { id: "086", txt: "乗り降り" },
         { id: "087", txt: "逝っとけ" },
         { id: "088", txt: "対向列車" },
         { id: "089", txt: "発車" },
@@ -79,20 +81,43 @@ const DB = {
 };
 
 let buildQueue = [];
+let hiDisplayOrder = 1; // 1: 昇順, -1: 降順
+let isPlaying = false;
 const player = new Audio();
 
 // 再生ロジック (確実に3桁のファイル名にする)
 function playQueue(ids) {
+    if (isPlaying) { player.pause(); player.currentTime = 0; }
+    isPlaying = true;
     let i = 0;
     const next = () => {
-        if (i < ids.length) {
+        if (i < ids.length && isPlaying) {
             const track = String(ids[i]).padStart(3, '0');
             player.src = `audio/${track}.wav`;
             player.play().catch(e => { console.error("再生エラー:", track); i++; next(); });
             player.onended = () => { i++; next(); };
+        } else {
+            isPlaying = false;
         }
     };
     next();
+}
+
+function stopBroadcast() {
+    isPlaying = false;
+    player.pause();
+    player.currentTime = 0;
+}
+
+// 順序を入れ替える
+function movePart(index, direction) {
+    const newIndex = index + direction;
+    if (newIndex >= 0 && newIndex < buildQueue.length) {
+        const temp = buildQueue[index];
+        buildQueue[index] = buildQueue[newIndex];
+        buildQueue[newIndex] = temp;
+        updateBuilderDisplay();
+    }
 }
 
 // 構成パーツを個別に削除
@@ -101,7 +126,7 @@ function removePart(index) {
     updateBuilderDisplay();
 }
 
-// 画面上の表示更新（クリックで削除可能に）
+// 画面上の表示更新（ドラッグ＆ドロップ対応、矢印ボタン廃止）
 function updateBuilderDisplay() {
     const disp = document.getElementById('builderDisplay');
     disp.innerHTML = "";
@@ -110,16 +135,50 @@ function updateBuilderDisplay() {
         return;
     }
     buildQueue.forEach((item, index) => {
-        const span = document.createElement('span');
-        span.className = "build-item";
-        span.innerText = `[${item.txt}]`;
-        span.style.cursor = "pointer";
-        span.onclick = () => removePart(index);
-        disp.appendChild(span);
+        const part = document.createElement('div');
+        part.className = "build-segment";
+        part.draggable = true;
+        part.dataset.index = index;
+
+        // ドラッグイベント
+        part.ondragstart = (e) => {
+            e.dataTransfer.setData('text/plain', index);
+            part.classList.add('dragging');
+        };
+        part.ondragend = () => part.classList.remove('dragging');
+        part.ondragover = (e) => {
+            e.preventDefault();
+            part.classList.add('drag-over');
+        };
+        part.ondragleave = () => part.classList.remove('drag-over');
+        part.ondrop = (e) => {
+            e.preventDefault();
+            part.classList.remove('drag-over');
+            const fromIdx = parseInt(e.dataTransfer.getData('text/plain'));
+            const toIdx = index;
+            if (fromIdx !== toIdx) {
+                const movedItem = buildQueue.splice(fromIdx, 1)[0];
+                buildQueue.splice(toIdx, 0, movedItem);
+                updateBuilderDisplay();
+            }
+        };
+
+        const label = document.createElement('span');
+        label.className = "segment-label";
+        label.innerText = item.txt;
+
+        const DBtn = document.createElement('button');
+        DBtn.className = "segment-del";
+        DBtn.innerHTML = "×";
+        DBtn.title = "削除";
+        DBtn.onclick = (e) => { e.stopPropagation(); removePart(index); };
+
+        part.append(label, DBtn);
+        disp.appendChild(part);
     });
 }
 
-// 終着スイッチの排他制御（一つしか選べないようにする）
+// 終着スイッチの排他制御
 function updateTerminalSwitches() {
     let selectedIdx = -1;
     DB.HI.forEach((_, i) => {
@@ -136,42 +195,47 @@ function updateTerminalSwitches() {
 function refreshActiveHI() {
     const list = document.getElementById('active-station-list');
     list.innerHTML = "";
-    DB.HI.forEach((st, i) => {
+
+    const stations = DB.HI.map((st, i) => ({ ...st, originalIndex: i }));
+    if (hiDisplayOrder === -1) stations.reverse();
+
+    stations.forEach((st) => {
+        const i = st.originalIndex;
         const isStop = document.getElementById(`hi-stop-${i}`).checked;
         const isTerm = document.getElementById(`hi-term-${i}`)?.checked;
         if (isStop) {
-            const row = document.createElement('div'); 
+            const row = document.createElement('div');
             row.className = "station-row";
-            if (isTerm) row.style.borderLeft = "6px solid #ff4444";
-            
+            if (isTerm) row.style.borderLeft = "6px solid #ef4444";
+
             const nameArea = document.createElement('div');
             nameArea.className = "st-name-area";
-            nameArea.innerHTML = `${st.name}${isTerm ? '<span class="term-label">終点</span>' : ''}`;
-            
+            nameArea.innerHTML = `${st.name}${isTerm ? '<span class="term-label" style="font-size:10px; margin-left:8px; opacity:0.7;">終点</span>' : ''}`;
+
             const btnGroup = document.createElement('div');
             btnGroup.className = "st-btn-group";
-            
-            const nBtn = document.createElement('button'); 
+
+            const nBtn = document.createElement('button');
             nBtn.className = "btn-next"; nBtn.innerText = "Next";
             nBtn.onclick = () => {
                 const track = (isTerm && st.terminalNext) ? st.terminalNext : st.next;
                 playQueue([track]);
             };
-            
-            const sBtn = document.createElement('button'); 
+
+            const sBtn = document.createElement('button');
             sBtn.className = "btn-soon"; sBtn.innerText = "Soon";
             sBtn.onclick = () => {
                 let queue = [];
                 if (isTerm) {
                     if (st.terminalSoon) queue.push(st.terminalSoon);
                     else queue.push(st.soon);
-                    queue.push("070", "071"); // 終着なら必ず連結
+                    queue.push("070", "071");
                 } else {
                     queue.push(st.soon);
                 }
                 playQueue(queue);
             };
-            
+
             btnGroup.append(nBtn, sBtn);
             row.append(nameArea, btnGroup);
             list.appendChild(row);
@@ -181,14 +245,21 @@ function refreshActiveHI() {
 
 // 初期化
 document.addEventListener('DOMContentLoaded', () => {
+    // 警告モーダルの表示
+    const modal = document.getElementById('warningModal');
+    modal.classList.add('active');
+    document.getElementById('modalConfirmBtn').onclick = () => modal.classList.remove('active');
+
     // 設定表の生成
     const hiBody = document.getElementById('station-master-body');
     DB.HI.forEach((st, i) => {
-        const termHtml = st.canBeTerm 
+        const termHtml = st.canBeTerm
             ? `<label class="custom-chk"><input type="checkbox" id="hi-term-${i}" onchange="updateTerminalSwitches()"><span class="checkmark term-sw"></span></label>`
             : `<span class="term-disabled-text">不可</span>`;
-        hiBody.innerHTML += `<tr><td><label class="custom-chk"><input type="checkbox" id="hi-stop-${i}" onchange="refreshActiveHI()"><span class="checkmark stop-sw"></span></label></td>
-                             <td style="font-weight:bold;">${st.name}</td><td>${termHtml}</td></tr>`;
+        const row = document.createElement('tr');
+        row.innerHTML = `<td><label class="custom-chk"><input type="checkbox" id="hi-stop-${i}" onchange="refreshActiveHI()"><span class="checkmark stop-sw"></span></label></td>
+                         <td style="font-weight:bold;">${st.name}</td><td>${termHtml}</td>`;
+        hiBody.appendChild(row);
     });
 
     // Builderボタンの生成
@@ -202,18 +273,35 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     createBtn('builder-stations', DB.STATIONS);
     createBtn('builder-train-info', DB.TRAIN_INFO);
-    
-    // EFボタンの生成 (縦・スクロールエリア内)
+
+    // EFボタンの生成
     const efList = document.getElementById('ef-immediate-list');
     DB.EF.forEach(item => {
         const b = document.createElement('button');
-        b.innerText = `▶ ${item.txt}`;
+        b.innerText = item.txt;
         b.onclick = () => playQueue([item.id]);
         efList.appendChild(b);
     });
 
+    // 各種イベント
     document.getElementById('playBtn').onclick = () => buildQueue.length && playQueue(buildQueue.map(i => i.id));
     document.getElementById('clearBtn').onclick = () => { buildQueue = []; updateBuilderDisplay(); };
-    setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
+    document.getElementById('stopBtn').onclick = () => stopBroadcast();
 
+    // 最小化トグル
+    const minimizeBtn = document.getElementById('minimizeBtn');
+    minimizeBtn.onclick = () => {
+        const card = document.getElementById('builderCard');
+        card.classList.toggle('minimized');
+    };
+
+    // 順序切替
+    const sortBtn = document.getElementById('sortOrderBtn');
+    sortBtn.onclick = () => {
+        hiDisplayOrder *= -1;
+        sortBtn.innerText = hiDisplayOrder === 1 ? '⇅ 昇順' : '⇅ 降順';
+        refreshActiveHI();
+    };
+
+    setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
 });

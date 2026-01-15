@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
-    <title>鴨原電鉄自動放送</title>
-    
-<link rel="stylesheet" href="style.css?v=1.0.1">
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>鴨原電鉄自動放送 - Premium Interface</title>
+
+    <link rel="stylesheet" href="style.css">
+
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0078d4">
+    <meta name="theme-color" content="#6366f1">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <script>
         if ('serviceWorker' in navigator) {
@@ -15,60 +17,133 @@
         }
     </script>
 </head>
+
 <body>
-    <header class="header">
-        <div class="system-info">
-            <span class="id">Kamohara Electric Railway Automatic broadcast</span>
-            <span class="name">鴨原電鉄 自動放送</span>
-        </div>
-        <div id="clock">00:00:00</div>
-    </header>
-
-    <main class="main-layout">
-        <section class="panel">
-            <h2 class="panel-title">設定・Builder</h2>
-            <div class="scroll-v">
-                <p class="category-label">1. 停車・終着スイッチ (HI)</p>
-                <table class="master-table">
-                    <thead><tr><th>停車</th><th>駅名</th><th>終着</th></tr></thead>
-                    <tbody id="station-master-body"></tbody>
-                </table>
-
-                <p class="category-label">2. 放送Builder</p>
-                <div class="lcd" id="builderDisplay">構成待ち...</div>
-                <div class="builder-controls">
-                    <button class="btn-play" id="playBtn">▶ 再生</button>
-                    <button class="btn-util" id="clearBtn">全消去</button>
+    <div class="bg-image-layer"></div>
+    <!-- Startup Warning Modal -->
+    <div id="warningModal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-content-wrapper">
+                <div class="modal-icon">⚠️</div>
+                <div class="modal-text-content">
+                    <h1 class="modal-title">走行中注視禁止</h1>
+                    <p class="modal-text">
+                        運転中の画面注視は非常に危険です。<br>
+                        事故防止のため、案内放送以外の操作は、停車中に行ってください。
+                    </p>
                 </div>
-                
-                <p class="item-label">● 駅名パーツ</p>
-                <div id="builder-stations" class="btn-grid-small"></div>
-                <p class="item-label">● 電車案内パーツ</p>
-                <div id="builder-train-info" class="btn-grid-small"></div>
             </div>
-        </section>
-
-        <section class="panel">
-            <h2 class="panel-title">運行案内実行 (HI)</h2>
-            <div id="active-station-list" class="scroll-v"></div>
-        </section>
-
-        <div class="panel">
-            <h2 class="panel-title">選択放送 (EF)</h2>
-            <div id="ef-immediate-list" class="scroll-v ef-container"></div>
-            
-            <section class="help-panel" style="margin-top: 15px; border-top: 1px solid #333; padding-top: 10px;">
-                <h2 class="panel-title" style="font-size: 12px;">クレジット表記</h2>
-                <div class="help-content" style="font-size: 11px; color: #888;">
-                    <p>・<strong>音声:</strong> Takoe 七日週_T2モデル</p>
-                    <p>・<strong>作成:</strong> WhiteJPN & Gemini</p>
-                </div>
-            </section>
+            <button id="modalConfirmBtn" class="btn-play-hero">了解しました</button>
         </div>
-    </main>
+    </div>
+
+    <div class="app-container">
+        <header class="app-header">
+            <div class="brand">
+                <div class="brand-logo">KRAB</div>
+                <div class="brand-text">
+                    <span class="brand-sub">Kamohara Electric Railway</span>
+                    <span class="brand-main">自動放送システム</span>
+                </div>
+            </div>
+            <div class="header-controls">
+                <div id="clock" class="digital-clock">00:00:00</div>
+            </div>
+        </header>
+
+        <main class="content-grid">
+            <!-- Sidebar: Configuration -->
+            <aside class="side-panel">
+                <div class="card card-config">
+                    <h2 class="card-title">設定・マスター</h2>
+                    <div class="card-content scroll-v">
+                        <div class="config-section">
+                            <h3 class="section-label">1. 運行状態 (HI)</h3>
+                            <table class="master-table">
+                                <thead>
+                                    <tr>
+                                        <th>停車</th>
+                                        <th>駅名</th>
+                                        <th>終着</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="station-master-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card card-credits">
+                    <h2 class="card-title">システム情報</h2>
+                    <div class="card-content scroll-v">
+                        <div class="credit-item">
+                            <span class="label">音声合成</span>
+                            <span class="value">Takoe 七日週_T2モデル</span>
+                        </div>
+                        <div class="credit-item">
+                            <span class="label">開発</span>
+                            <span class="value">WhiteJPN & Gemini</span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content: Builder & Execution -->
+            <div class="main-sections">
+                <section class="card card-builder" id="builderCard">
+                    <div class="card-header-flex">
+                        <div class="title-with-actions">
+                            <h2 class="card-title">放送Builder</h2>
+                        </div>
+                        <div class="builder-actions">
+                            <button class="btn-icon-small" id="minimizeBtn" title="最小化/拡大">
+                                <span class="icon-expand">⤢</span>
+                                <span class="icon-collapse">⤡</span>
+                            </button>
+                            <button class="btn-stop" id="stopBtn">STOP</button>
+                            <button class="btn-play-hero" id="playBtn"><span>▶</span> PLAY</button>
+                        </div>
+                    </div>
+
+                    <div class="builder-expand-content">
+                        <div class="monitor-container">
+                            <div class="lcd-monitor" id="builderDisplay">構成待ち...</div>
+                            <button class="btn-util-floating" id="clearBtn" title="全消去">Clear</button>
+                        </div>
+
+                        <div class="builder-parts scroll-v">
+                            <div class="part-group">
+                                <h3 class="section-label">駅名パーツ (Drag to reorder)</h3>
+                                <div id="builder-stations" class="part-grid"></div>
+                            </div>
+                            <div class="part-group">
+                                <h3 class="section-label">案内パーツ</h3>
+                                <div id="builder-train-info" class="part-grid"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="card card-execution">
+                    <div class="card-header-flex">
+                        <h2 class="card-title">運行案内</h2>
+                        <button class="btn-icon-small" id="sortOrderBtn" title="駅順切り替え">⇅ 昇順</button>
+                    </div>
+                    <div id="active-station-list" class="execution-list scroll-v"></div>
+                </section>
+            </div>
+
+            <!-- Right Panel: Selection Broadcast -->
+            <aside class="side-panel">
+                <section class="card card-ef">
+                    <h2 class="card-title">即時放送</h2>
+                    <div id="ef-immediate-list" class="ef-grid scroll-v"></div>
+                </section>
+            </aside>
+        </main>
+    </div>
 
     <script src="script.js"></script>
 </body>
+
 </html>
-
-
