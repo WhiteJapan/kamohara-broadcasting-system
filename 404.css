@@ -1,0 +1,199 @@
+:root {
+    --bg-base: #000000;
+    /* 多層グラデーション: 蠢くような深み */
+    --bg-mesh:
+        radial-gradient(at 20% 20%, hsla(225, 60%, 8%, 1) 0, transparent 50%),
+        radial-gradient(at 80% 0%, hsla(260, 50%, 5%, 1) 0, transparent 50%),
+        radial-gradient(at 50% 50%, hsla(240, 40%, 3%, 1) 0, transparent 50%),
+        radial-gradient(at 10% 80%, hsla(210, 80%, 10%, 1) 0, transparent 50%),
+        radial-gradient(at 90% 90%, hsla(280, 40%, 5%, 1) 0, transparent 50%);
+
+    --accent-primary: #007AFF;
+    --accent-secondary: #5AC8FA;
+    --accent-glow: rgba(0, 122, 255, 0.4);
+    --accent-gradient: linear-gradient(180deg, #007AFF 0%, #0056b3 100%);
+
+    --text-main: #FFFFFF;
+    --text-dim: rgba(255, 255, 255, 0.55);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: var(--bg-base);
+    color: var(--text-main);
+    font-family: -apple-system, BlinkMacSystemFont, "Inter", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Noto Sans JP", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Background Layer: 深い蠢き */
+.bg-layer {
+    position: fixed;
+    inset: -10%;
+    width: 120%;
+    height: 120%;
+    background: var(--bg-base);
+    background-image: var(--bg-mesh);
+    background-size: 200% 200%;
+    z-index: -1;
+    animation: bgLiquid 30s ease infinite alternate;
+    filter: blur(40px);
+}
+
+@keyframes bgLiquid {
+    0% {
+        background-position: 0% 0%;
+        transform: rotate(0deg);
+    }
+
+    50% {
+        background-position: 100% 100%;
+    }
+
+    100% {
+        background-position: 50% 0%;
+        transform: rotate(2deg);
+    }
+}
+
+.error-container {
+    padding: 40px;
+    width: 100%;
+    max-width: 800px;
+    z-index: 1;
+    text-align: center;
+}
+
+/* Frameless Content Structure */
+.error-content {
+    animation: floatEntrance 1.2s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+@keyframes floatEntrance {
+    0% {
+        transform: translateY(60px);
+        opacity: 0;
+        filter: blur(20px);
+    }
+
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+        filter: blur(0);
+    }
+}
+
+.error-icon {
+    font-size: 100px;
+    margin-bottom: 20px;
+    filter: drop-shadow(0 0 30px var(--accent-glow));
+    display: inline-block;
+    animation: ghostBounce 3s infinite ease-in-out;
+}
+
+@keyframes ghostBounce {
+
+    0%,
+    100% {
+        transform: translateY(0) scale(1);
+        opacity: 0.8;
+    }
+
+    50% {
+        transform: translateY(-30px) scale(1.05);
+        opacity: 1;
+    }
+}
+
+.error-code {
+    font-size: 180px;
+    font-weight: 900;
+    line-height: 0.7;
+    margin-bottom: 30px;
+    background: linear-gradient(180deg, #fff 30%, var(--accent-secondary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 40px rgba(77, 171, 247, 0.2));
+    letter-spacing: -0.08em;
+}
+
+.error-title {
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 20px;
+    color: #fff;
+    letter-spacing: 0.1em;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+}
+
+.error-message {
+    font-size: 18px;
+    line-height: 1.6;
+    color: var(--text-dim);
+    margin-bottom: 50px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.btn-home {
+    display: inline-flex;
+    align-items: center;
+    gap: 15px;
+    padding: 16px 40px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 100px;
+    /* Pill shape */
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 17px;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: var(--shadow-md);
+    backdrop-filter: blur(20px);
+}
+
+.btn-home:hover {
+    background: var(--accent-gradient);
+    border-color: transparent;
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 15px 40px rgba(0, 122, 255, 0.4);
+}
+
+.btn-home svg {
+    transition: transform 0.3s ease;
+}
+
+.btn-home:hover svg {
+    transform: translateX(-6px);
+}
+
+/* 煽り要素のスパイス */
+.insult-text {
+    font-size: 14px;
+    margin-top: 30px;
+    color: rgba(239, 68, 68, 0.4);
+    font-style: italic;
+    animation: fadeIn 4s ease forwards;
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
