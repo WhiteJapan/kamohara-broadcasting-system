@@ -93,7 +93,7 @@ function playQueue(ids) {
     const next = () => {
         if (i < ids.length && isPlaying) {
             const track = String(ids[i]).padStart(3, '0');
-            player.src = `audio/${track}.wav`;
+            player.src = `../../audio/${track}.wav`;
             player.play().catch(e => { console.error("再生エラー:", track); i++; next(); });
             player.onended = () => { i++; next(); };
         } else {
@@ -304,4 +304,5 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
+
 });
