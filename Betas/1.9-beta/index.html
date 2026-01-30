@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>鴨原電鉄自動放送</title>
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Noto+Sans+JP:wght@400;700;900&display=swap"
+        rel="stylesheet">
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js');
+        }
+    </script>
+</head>
+
+<body>
+    <div class="bg-image-layer"></div>
+    <!-- Startup Warning Modal -->
+    <div id="warningModal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-content-wrapper">
+                <div class="modal-icon">⚠️</div>
+                <div class="modal-text-content">
+                    <h1 class="modal-title">走行中注視禁止</h1>
+                    <p class="modal-text">
+                        運転中の画面注視は非常に危険です。<br>
+                        事故防止のため、案内放送以外の操作は、停車中に行ってください。
+                    </p>
+                </div>
+            </div>
+            <button id="modalConfirmBtn" class="btn-play-hero">了解しました</button>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <header class="app-header">
+            <div class="brand">
+                <div class="brand-logo">KRAB</div>
+                <div class="brand-text">
+                    <span class="brand-sub">Kamohara Electric Railway</span>
+                    <span class="brand-main">自動放送システム</span>
+                </div>
+            </div>
+            <div class="header-controls">
+                <button id="settings-btn" class="btn-icon" title="設定">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path
+                            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                        </path>
+                    </svg>
+                </button>
+                <button id="ui-toggle-btn" class="btn-icon" title="UIを表示/非表示">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M2.5 12c0 0 4.5-8 9.5-8s9.5 8 9.5 8-4.5 8-9.5 8-9.5-8-9.5-8z"></path>
+                        <circle cx="12" cy="12" r="3.5"></circle>
+                    </svg>
+                </button>
+                <div id="clock" class="digital-clock">00:00:00</div>
+            </div>
+        </header>
+
+        <main class="content-grid">
+            <!-- Sidebar: Configuration -->
+            <aside class="side-panel">
+                <div class="card card-config">
+                    <div class="card-header-flex">
+                        <h2 class="card-title">停車駅</h2>
+                        <div class="header-actions">
+                            <button class="btn-util-small" onclick="toggleAllStops(true)">全停車</button>
+                            <button class="btn-util-small" onclick="toggleAllStops(false)">全通過</button>
+                        </div>
+                    </div>
+                    <div class="card-content scroll-v">
+                        <div class="config-section">
+                            <table class="master-table">
+                                <thead>
+                                    <tr>
+                                        <th>停車</th>
+                                        <th>駅名</th>
+                                        <th>終着</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="station-master-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </aside>
+
+            <!-- Main Content: Builder & Execution -->
+            <div class="main-sections">
+                <section class="card card-builder" id="builderCard">
+                    <div class="card-header-flex">
+                        <div class="title-with-actions">
+                            <h2 class="card-title">放送Builder</h2>
+                        </div>
+                        <div class="builder-actions">
+                            <button class="btn-stop" id="stopBtn">STOP</button>
+                            <button class="btn-play-hero" id="playBtn"><span>▶</span> PLAY</button>
+                        </div>
+                    </div>
+
+                    <div class="builder-expand-content">
+                        <div class="monitor-container">
+                            <div class="lcd-monitor" id="builderDisplay">構成待ち...</div>
+                            <button class="btn-util-floating" id="clearBtn" title="全消去">Clear</button>
+                        </div>
+
+                        <div class="builder-parts scroll-v">
+                            <div class="part-group">
+                                <h3 class="section-label">駅名パーツ (Drag to reorder)</h3>
+                                <div id="builder-stations" class="part-grid"></div>
+                            </div>
+                            <div class="part-group">
+                                <h3 class="section-label">案内パーツ</h3>
+                                <div id="builder-train-info" class="part-grid"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <div id="resizeHandle" class="resize-handle"></div>
+
+                <section class="card card-execution">
+                    <div class="card-header-flex">
+                        <h2 class="card-title">案内放送</h2>
+                        <button class="btn-icon-small" id="sortOrderBtn" title="駅順切り替え">⇅ 昇順</button>
+                    </div>
+                    <div id="active-station-list" class="execution-list scroll-v"></div>
+                </section>
+            </div>
+
+            <!-- Right Panel: Selection Broadcast -->
+            <aside class="side-panel">
+                <section class="card card-ef">
+                    <h2 class="card-title">選択放送</h2>
+                    <div id="ef-immediate-list" class="ef-grid scroll-v"></div>
+                </section>
+            </aside>
+        </main>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal-overlay">
+        <div class="modal-card settings-card">
+            <div class="modal-header">
+                <h2 class="modal-title">システム設定</h2>
+                <button id="settingsCloseBtn" class="btn-close">&times;</button>
+            </div>
+
+            <div class="modal-body scroll-v">
+                <!-- Theme Settings -->
+                <div class="settings-group">
+                    <h3 class="settings-subtitle">テーマ</h3>
+                    <div class="theme-selector-grid">
+                        <button class="theme-opt" data-value="light">
+                            <span class="opt-icon">☀️</span>
+                            <span class="opt-label">ライト</span>
+                        </button>
+                        <button class="theme-opt" data-value="dark">
+                            <span class="opt-icon">🌙</span>
+                            <span class="opt-label">ダーク</span>
+                        </button>
+                        <button class="theme-opt" data-value="auto">
+                            <span class="opt-icon">🌓</span>
+                            <span class="opt-label">システム</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Volume Settings -->
+                <div class="settings-group">
+                    <div class="settings-row">
+                        <h3 class="settings-subtitle">マスター音量</h3>
+                        <span id="volume-val" class="settings-val">100%</span>
+                    </div>
+                    <input type="range" id="volume-range" min="0" max="100" value="100" class="styled-range">
+                </div>
+
+                <!-- Speed Settings -->
+                <div class="settings-group">
+                    <div class="settings-row">
+                        <h3 class="settings-subtitle">再生速度</h3>
+                        <span id="speed-val" class="settings-val">1.0x</span>
+                    </div>
+                    <input type="range" id="speed-range" min="50" max="200" value="100" step="5" class="styled-range">
+                </div>
+
+                <!-- Other Options -->
+                <div class="settings-group">
+                    <h3 class="settings-subtitle">一般</h3>
+                    <div class="settings-check-row">
+                        <label class="switch-label">
+                            <span class="switch-text">起動時の警告を次回から表示しない</span>
+                            <input type="checkbox" id="skip-warning-check">
+                            <div class="switch-ui"></div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- History Log -->
+                <div class="settings-group">
+                    <h3 class="settings-subtitle">放送履歴 (直近5件)</h3>
+                    <div id="broadcast-history" class="history-list">
+                        <div class="history-placeholder">履歴はありません</div>
+                    </div>
+                </div>
+
+                <!-- System Information -->
+                <div class="settings-group">
+                    <h3 class="settings-subtitle">システム情報</h3>
+                    <div class="settings-credits">
+                        <div class="credit-item">
+                            <span class="label">バージョン</span>
+                            <span class="value">v1.8-beta</span>
+                        </div>
+                        <div class="credit-item">
+                            <span class="label">音声合成</span>
+                            <span class="value">Takoe 七日週_T2モデル</span>
+                        </div>
+                        <div class="credit-item">
+                            <span class="label">開発</span>
+                            <span class="value">WhiteJPN & Gemini</span>
+                        </div>
+                        <div class="credit-item">
+                            <span class="label">背景画像</span>
+                            <span class="value">Yellow_mqo</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reset -->
+                <div class="settings-group reset-group">
+                    <button id="reset-settings-btn" class="btn-danger-outline">設定をリセット</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
