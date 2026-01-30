@@ -5,7 +5,7 @@
 
 > [!IMPORTANT]
 > このサイトの音声はTakoeの"七日週_T2モデル"を利用して作成しております。
-> このサイトを利用する際は"https://wedst.pj.ymhk.jp/tos.html"を確認してください。
+> このサイトを利用する際は https://wedst.pj.ymhk.jp/tos.html を確認してください。
 
 > [!NOTE]
 > 放送の抑揚の付け方が全体的に下手くそです。
