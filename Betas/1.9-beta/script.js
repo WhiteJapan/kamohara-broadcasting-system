@@ -197,6 +197,14 @@ function playQueue(ids, onComplete) {
     if (isPlaying) { player.pause(); player.currentTime = 0; }
     isPlaying = true;
 
+    // 手動放送（BuilderやEF）による割り込みの場合、案内状態をリセット
+    // 案内IDでない場合（idsの長さが1より大きい、またはids[0]がDB.HIに含まれない）
+    const isGuidance = ids.length === 1 && DB.HI.some(h => h.next == ids[0] || h.soon == ids[0] || h.terminalNext == ids[0] || h.terminalSoon == ids[0]);
+    if (!isGuidance) {
+        currentStatus = { index: -1, type: null };
+        refreshActiveHI();
+    }
+
     // 履歴追加ロジック
     const firstId = ids[0];
     let historyTxt = "不明な放送";
@@ -218,7 +226,7 @@ function playQueue(ids, onComplete) {
     const next = () => {
         if (i < ids.length && isPlaying) {
             const track = String(ids[i]).padStart(3, '0');
-            player.src = `../../audio/${track}.wav`;
+            player.src = `audio/${track}.wav`;
 
             // 再生開始前に最新設定を適用
             player.volume = settings.volume / 100;
@@ -250,8 +258,10 @@ function updateBuilderDisplay() {
     disp.innerHTML = "";
     if (buildQueue.length === 0) {
         disp.innerText = "構成待ち...";
+        disp.classList.add('is-empty');
         return;
     }
+    disp.classList.remove('is-empty');
     buildQueue.forEach((item, index) => {
         const part = document.createElement('div');
         part.className = "build-segment";
@@ -308,6 +318,16 @@ function toggleAllStops(value) {
     refreshActiveHI();
 }
 
+function markPreviousStationsAsCompleted(currentIndex) {
+    const stations = DB.HI.map((st, i) => ({ ...st, originalIndex: i }));
+    if (hiDisplayOrder === -1) stations.reverse();
+
+    for (const st of stations) {
+        if (st.originalIndex === currentIndex) break;
+        completedStations.add(st.originalIndex);
+    }
+}
+
 function refreshActiveHI() {
     const list = document.getElementById('active-station-list');
     if (!list) return;
@@ -349,8 +369,10 @@ function refreshActiveHI() {
 
         row.innerHTML = `
             <div class="st-name-area">
-                <div class="st-name-main">${st.name}${isTerm ? '<span class="term-label">終点</span>' : ''}</div>
                 ${statusBadge}
+                <div class="st-name-main">
+                    ${st.name}${isTerm ? '<span class="term-label">終点</span>' : ''}
+                </div>
             </div>
         `;
 
@@ -360,6 +382,8 @@ function refreshActiveHI() {
         const nBtn = document.createElement('button');
         nBtn.className = "btn-next"; nBtn.innerText = "Next";
         nBtn.onclick = () => {
+            markPreviousStationsAsCompleted(i); // この駅より前を完了にする
+            completedStations.delete(i);
             currentStatus = { index: i, type: 'next' };
             const track = (isTerm && st.terminalNext) ? st.terminalNext : st.next;
             playQueue([track]);
@@ -369,6 +393,8 @@ function refreshActiveHI() {
         const sBtn = document.createElement('button');
         sBtn.className = "btn-soon"; sBtn.innerText = "Soon";
         sBtn.onclick = () => {
+            markPreviousStationsAsCompleted(i); // この駅より前を完了にする
+            completedStations.delete(i);
             currentStatus = { index: i, type: 'soon' };
             let queue = [];
             if (isTerm) {
@@ -377,16 +403,18 @@ function refreshActiveHI() {
                 queue.push(st.soon);
             }
             refreshActiveHI();
-            playQueue(queue, () => {
-                completedStations.add(i);
-                currentStatus = { index: -1, type: null };
-                refreshActiveHI();
-            });
+            playQueue(queue); // 自動完了のコールバックを削除
         };
         btnGroup.append(nBtn, sBtn);
         row.appendChild(btnGroup);
         list.appendChild(row);
     });
+}
+
+function resetProgress() {
+    completedStations.clear();
+    currentStatus = { index: -1, type: null };
+    refreshActiveHI();
 }
 
 // --- Main Init ---
@@ -575,6 +603,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initial render
     refreshActiveHI();
+    updateBuilderDisplay();
+
+    // LCD Font Scaling
+    const lcdObserver = new ResizeObserver(entries => {
+        for (let entry of entries) {
+            const height = entry.contentRect.height;
+            const disp = entry.target;
+            // 構成待ち状態（is-empty）の時だけ大きくスケール
+            if (disp.classList.contains('is-empty')) {
+                disp.style.fontSize = '14px'; // Consistent size for empty state
+            } else {
+                disp.style.fontSize = ''; // Reset to CSS default for segments
+            }
+        }
+    });
+    const lcdMonitor = document.getElementById('builderDisplay');
+    if (lcdMonitor) lcdObserver.observe(lcdMonitor);
 
     // 背景パララックス
     document.addEventListener('mousemove', (e) => {

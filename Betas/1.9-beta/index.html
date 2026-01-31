@@ -140,7 +140,10 @@
                 <section class="card card-execution">
                     <div class="card-header-flex">
                         <h2 class="card-title">案内放送</h2>
-                        <button class="btn-icon-small" id="sortOrderBtn" title="駅順切り替え">⇅ 昇順</button>
+                        <div class="header-actions">
+                            <button class="btn-util-small" onclick="resetProgress()">リセット</button>
+                            <button class="btn-icon-small" id="sortOrderBtn" title="駅順切り替え">⇅ 昇順</button>
+                        </div>
                     </div>
                     <div id="active-station-list" class="execution-list scroll-v"></div>
                 </section>
@@ -228,7 +231,7 @@
                     <div class="settings-credits">
                         <div class="credit-item">
                             <span class="label">バージョン</span>
-                            <span class="value">v1.9-beta</span>
+                            <span class="value">v1.8-beta</span>
                         </div>
                         <div class="credit-item">
                             <span class="label">音声合成</span>
