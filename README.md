@@ -24,7 +24,7 @@ Logicool社の[MixLine](https://gaming.logicool.co.jp/ja-jp/software/mixline)を
 ## ChangeLog
 [開発記録（ChangeLog）はこちら](./ChangeLog.md)
 
-## Known Issues
+## Known Issues (BETA)
 - 時計のボックスの大きさが変わってしまう。
 
 - 駅放送中に駅選択を消してしまうと次はorまもなくが表示されたまま消えない。
