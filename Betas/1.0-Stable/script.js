@@ -218,57 +218,80 @@ document.addEventListener('DOMContentLoaded', () => {
 
 });
 
-/* --- 万能警告システム (JS完結版) --- */
+/* --- 警告表示システム（文字・デザイン完全内蔵版） --- */
 (function() {
-    const warning = document.getElementById('mobile-warning');
-    if (!warning) return;
-
-    // スタイルをJSから強制適用（!important付き）
-    const applyStyle = (el, styleProp, value) => {
-        el.style.setProperty(styleProp, value, 'important');
-    };
-
-    // 見た目を整える
-    const setupStyles = () => {
-        applyStyle(warning, 'position', 'fixed');
-        applyStyle(warning, 'bottom', '20px');
-        applyStyle(warning, 'right', '20px');
-        applyStyle(warning, 'background', 'rgba(255, 59, 48, 0.95)');
-        applyStyle(warning, 'color', 'white');
-        applyStyle(warning, 'padding', '12px 20px');
-        applyStyle(warning, 'border-radius', '12px');
-        applyStyle(warning, 'z-index', '9999999');
-        applyStyle(warning, 'font-size', '14px');
-        applyStyle(warning, 'font-weight', 'bold');
-        applyStyle(warning, 'box-shadow', '0 8px 32px rgba(0,0,0,0.4)');
-        applyStyle(warning, 'backdrop-filter', 'blur(10px)');
-        applyStyle(warning, 'border', '1px solid rgba(255,255,255,0.2)');
-        applyStyle(warning, 'align-items', 'center');
-        applyStyle(warning, 'gap', '12px');
-        applyStyle(warning, 'pointer-events', 'auto');
-    };
-
-    setupStyles();
-
-    // 画面サイズをチェックして表示・非表示を切り替える
-    const checkSize = () => {
-        if (window.innerWidth <= 1024) {
-            applyStyle(warning, 'display', 'flex');
-        } else {
-            applyStyle(warning, 'display', 'none');
+    const WARNING_TEXT = "⚠️ 画面サイズが小さいため表示が崩れる場合があります";
+    
+    const initWarning = () => {
+        let warningEl = document.getElementById('mobile-warning');
+        
+        // 1. HTMLに要素がなければ作成、あれば中身を書き換え
+        if (!warningEl) {
+            warningEl = document.createElement('div');
+            warningEl.id = 'mobile-warning';
+            document.body.appendChild(warningEl);
         }
-    };
+        
+        // 2. 文字と閉じるボタンを強制セット
+        warningEl.innerHTML = `
+            <span style="flex:1">${WARNING_TEXT}</span>
+            <button id="mobile-warning-close" style="background:rgba(0,0,0,0.2); border:none; color:white; width:24px; height:24px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:16px;">×</button>
+        `;
 
-    window.addEventListener('resize', checkSize);
-    checkSize(); // 読み込み時に実行
+        // 3. スタイルを強制適用（!important）
+        const setStyle = (prop, val) => warningEl.style.setProperty(prop, val, 'important');
+        
+        const styles = {
+            'position': 'fixed',
+            'bottom': '20px',
+            'right': '20px',
+            'background': 'rgba(255, 59, 48, 0.95)', // iOS風の赤
+            'color': 'white',
+            'padding': '12px 18px',
+            'border-radius': '12px',
+            'z-index': '9999999',
+            'font-size': '14px',
+            'font-weight': 'bold',
+            'box-shadow': '0 8px 32px rgba(0,0,0,0.4)',
+            'backdrop-filter': 'blur(10px)',
+            '-webkit-backdrop-filter': 'blur(10px)',
+            'border': '1px solid rgba(255,255,255,0.2)',
+            'display': 'none', // 最初は隠す
+            'align-items': 'center',
+            'gap': '12px',
+            'max-width': '300px',
+            'line-height': '1.4',
+            'font-family': '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+        };
 
-    // 閉じるボタン（×）の処理
-    const closeBtn = document.getElementById('mobile-warning-close');
-    if (closeBtn) {
-        closeBtn.onclick = () => {
-            applyStyle(warning, 'display', 'none');
-            // 閉じた後はリサイズしても出ないようにする
+        for (const [prop, val] of Object.entries(styles)) {
+            setStyle(prop, val);
+        }
+
+        // 4. 表示・非表示の判定ロジック
+        const checkSize = () => {
+            if (window.innerWidth <= 1024) {
+                setStyle('display', 'flex');
+            } else {
+                setStyle('display', 'none');
+            }
+        };
+
+        window.addEventListener('resize', checkSize);
+        checkSize();
+
+        // 5. 閉じるボタンの動作
+        document.getElementById('mobile-warning-close').onclick = (e) => {
+            e.preventDefault();
+            setStyle('display', 'none');
             window.removeEventListener('resize', checkSize);
         };
+    };
+
+    // 実行
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initWarning);
+    } else {
+        initWarning();
     }
 })();

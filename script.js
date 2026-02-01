@@ -218,63 +218,80 @@ document.addEventListener('DOMContentLoaded', () => {
 
 });
 
-/* --- 万能警告システム (最強パワー版) --- */
+/* --- 警告表示システム（文字・デザイン完全内蔵版） --- */
 (function() {
-    const warning = document.getElementById('mobile-warning');
-    if (!warning) return;
+    const WARNING_TEXT = "⚠️ 画面サイズが小さいため表示が崩れる場合があります";
+    
+    const initWarning = () => {
+        let warningEl = document.getElementById('mobile-warning');
+        
+        // 1. HTMLに要素がなければ作成、あれば中身を書き換え
+        if (!warningEl) {
+            warningEl = document.createElement('div');
+            warningEl.id = 'mobile-warning';
+            document.body.appendChild(warningEl);
+        }
+        
+        // 2. 文字と閉じるボタンを強制セット
+        warningEl.innerHTML = `
+            <span style="flex:1">${WARNING_TEXT}</span>
+            <button id="mobile-warning-close" style="background:rgba(0,0,0,0.2); border:none; color:white; width:24px; height:24px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:16px;">×</button>
+        `;
 
-    // インラインスタイルでCSSを完全に上書きする関数
-    const setStyle = (prop, val) => warning.style.setProperty(prop, val, 'important');
-
-    // 見た目の設定（ここですべてのスタイルを定義）
-    const applyStyles = () => {
+        // 3. スタイルを強制適用（!important）
+        const setStyle = (prop, val) => warningEl.style.setProperty(prop, val, 'important');
+        
         const styles = {
             'position': 'fixed',
             'bottom': '20px',
             'right': '20px',
-            'background': 'rgba(255, 59, 48, 0.95)',
+            'background': 'rgba(255, 59, 48, 0.95)', // iOS風の赤
             'color': 'white',
-            'padding': '14px 22px',
-            'border-radius': '14px',
-            'z-index': '2147483647', // 32bit整数の最大値（絶対に最前面）
+            'padding': '12px 18px',
+            'border-radius': '12px',
+            'z-index': '9999999',
             'font-size': '14px',
             'font-weight': 'bold',
-            'box-shadow': '0 10px 40px rgba(0,0,0,0.5)',
-            'backdrop-filter': 'blur(15px)',
-            '-webkit-backdrop-filter': 'blur(15px)',
+            'box-shadow': '0 8px 32px rgba(0,0,0,0.4)',
+            'backdrop-filter': 'blur(10px)',
+            '-webkit-backdrop-filter': 'blur(10px)',
             'border': '1px solid rgba(255,255,255,0.2)',
+            'display': 'none', // 最初は隠す
             'align-items': 'center',
             'gap': '12px',
-            'pointer-events': 'auto',
-            'font-family': 'sans-serif'
+            'max-width': '300px',
+            'line-height': '1.4',
+            'font-family': '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
         };
+
         for (const [prop, val] of Object.entries(styles)) {
             setStyle(prop, val);
         }
-    };
 
-    const checkSize = () => {
-        // 1024px以下なら強制表示、それ以上なら非表示
-        if (window.innerWidth <= 1024) {
-            setStyle('display', 'flex');
-            setStyle('opacity', '1');
-        } else {
-            setStyle('display', 'none');
-        }
-    };
+        // 4. 表示・非表示の判定ロジック
+        const checkSize = () => {
+            if (window.innerWidth <= 1024) {
+                setStyle('display', 'flex');
+            } else {
+                setStyle('display', 'none');
+            }
+        };
 
-    // 初期化
-    applyStyles();
-    window.addEventListener('resize', checkSize);
-    checkSize();
+        window.addEventListener('resize', checkSize);
+        checkSize();
 
-    // 閉じるボタン
-    const closeBtn = document.getElementById('mobile-warning-close');
-    if (closeBtn) {
-        closeBtn.onclick = (e) => {
+        // 5. 閉じるボタンの動作
+        document.getElementById('mobile-warning-close').onclick = (e) => {
             e.preventDefault();
             setStyle('display', 'none');
-            window.removeEventListener('resize', checkSize); // 閉じた後はリサイズに反応させない
+            window.removeEventListener('resize', checkSize);
         };
+    };
+
+    // 実行
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initWarning);
+    } else {
+        initWarning();
     }
 })();
