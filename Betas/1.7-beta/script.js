@@ -347,57 +347,63 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
 });
 
-/* --- 万能警告システム (JS完結版) --- */
+/* --- 万能警告システム (最強パワー版) --- */
 (function() {
     const warning = document.getElementById('mobile-warning');
     if (!warning) return;
 
-    // スタイルをJSから強制適用（!important付き）
-    const applyStyle = (el, styleProp, value) => {
-        el.style.setProperty(styleProp, value, 'important');
-    };
+    // インラインスタイルでCSSを完全に上書きする関数
+    const setStyle = (prop, val) => warning.style.setProperty(prop, val, 'important');
 
-    // 見た目を整える
-    const setupStyles = () => {
-        applyStyle(warning, 'position', 'fixed');
-        applyStyle(warning, 'bottom', '20px');
-        applyStyle(warning, 'right', '20px');
-        applyStyle(warning, 'background', 'rgba(255, 59, 48, 0.95)');
-        applyStyle(warning, 'color', 'white');
-        applyStyle(warning, 'padding', '12px 20px');
-        applyStyle(warning, 'border-radius', '12px');
-        applyStyle(warning, 'z-index', '9999999');
-        applyStyle(warning, 'font-size', '14px');
-        applyStyle(warning, 'font-weight', 'bold');
-        applyStyle(warning, 'box-shadow', '0 8px 32px rgba(0,0,0,0.4)');
-        applyStyle(warning, 'backdrop-filter', 'blur(10px)');
-        applyStyle(warning, 'border', '1px solid rgba(255,255,255,0.2)');
-        applyStyle(warning, 'align-items', 'center');
-        applyStyle(warning, 'gap', '12px');
-        applyStyle(warning, 'pointer-events', 'auto');
-    };
-
-    setupStyles();
-
-    // 画面サイズをチェックして表示・非表示を切り替える
-    const checkSize = () => {
-        if (window.innerWidth <= 1024) {
-            applyStyle(warning, 'display', 'flex');
-        } else {
-            applyStyle(warning, 'display', 'none');
+    // 見た目の設定（ここですべてのスタイルを定義）
+    const applyStyles = () => {
+        const styles = {
+            'position': 'fixed',
+            'bottom': '20px',
+            'right': '20px',
+            'background': 'rgba(255, 59, 48, 0.95)',
+            'color': 'white',
+            'padding': '14px 22px',
+            'border-radius': '14px',
+            'z-index': '2147483647', // 32bit整数の最大値（絶対に最前面）
+            'font-size': '14px',
+            'font-weight': 'bold',
+            'box-shadow': '0 10px 40px rgba(0,0,0,0.5)',
+            'backdrop-filter': 'blur(15px)',
+            '-webkit-backdrop-filter': 'blur(15px)',
+            'border': '1px solid rgba(255,255,255,0.2)',
+            'align-items': 'center',
+            'gap': '12px',
+            'pointer-events': 'auto',
+            'font-family': 'sans-serif'
+        };
+        for (const [prop, val] of Object.entries(styles)) {
+            setStyle(prop, val);
         }
     };
 
-    window.addEventListener('resize', checkSize);
-    checkSize(); // 読み込み時に実行
+    const checkSize = () => {
+        // 1024px以下なら強制表示、それ以上なら非表示
+        if (window.innerWidth <= 1024) {
+            setStyle('display', 'flex');
+            setStyle('opacity', '1');
+        } else {
+            setStyle('display', 'none');
+        }
+    };
 
-    // 閉じるボタン（×）の処理
+    // 初期化
+    applyStyles();
+    window.addEventListener('resize', checkSize);
+    checkSize();
+
+    // 閉じるボタン
     const closeBtn = document.getElementById('mobile-warning-close');
     if (closeBtn) {
-        closeBtn.onclick = () => {
-            applyStyle(warning, 'display', 'none');
-            // 閉じた後はリサイズしても出ないようにする
-            window.removeEventListener('resize', checkSize);
+        closeBtn.onclick = (e) => {
+            e.preventDefault();
+            setStyle('display', 'none');
+            window.removeEventListener('resize', checkSize); // 閉じた後はリサイズに反応させない
         };
     }
 })();
