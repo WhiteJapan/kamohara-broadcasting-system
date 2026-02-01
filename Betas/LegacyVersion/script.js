@@ -119,3 +119,20 @@ function resetBtn() {
 }
 
 window.onload = init;
+
+/* --- 自動警告システムの追加 --- */
+(function() {
+    // 警告用HTMLを動的に生成
+    const warningDiv = document.createElement('div');
+    warningDiv.id = 'universal-mobile-warning';
+    warningDiv.innerHTML = `
+        <span>⚠️ 画面サイズが小さいため表示が崩れる場合があります</span>
+        <button id="univ-close-btn">×</button>
+    `;
+    document.body.appendChild(warningDiv);
+
+    // 閉じるボタンの動作
+    document.getElementById('univ-close-btn').addEventListener('click', () => {
+        warningDiv.style.display = 'none';
+    });
+})();

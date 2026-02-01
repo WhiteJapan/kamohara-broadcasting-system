@@ -876,3 +876,45 @@ input:checked+.checkmark::after {
     color: #ffffff !important;
     opacity: 0.9 !important;
 }
+
+/* --- 自動警告システムの追加 --- */
+#universal-mobile-warning {
+    display: none; /* 基本は非表示 */
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(255, 59, 48, 0.9); /* Apple風のレッド */
+    color: white;
+    padding: 12px 20px;
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+    z-index: 999999;
+    font-size: 14px;
+    font-weight: bold;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.2);
+    align-items: center;
+    gap: 12px;
+    transition: opacity 0.3s ease;
+}
+
+/* 1024px以下の時だけ表示 */
+@media (max-width: 1024px) {
+    #universal-mobile-warning {
+        display: flex;
+    }
+}
+
+#univ-close-btn {
+    background: rgba(0,0,0,0.2);
+    border: none;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
