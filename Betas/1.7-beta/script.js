@@ -347,77 +347,62 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
 });
 
-/* --- 警告表示システム（文字・デザイン完全内蔵版） --- */
+/* --- 警告強制表示システム（文字・デザイン完全内蔵版） --- */
 (function() {
-    const WARNING_TEXT = "⚠️ 画面サイズが小さいため表示が崩れる場合があります";
-    
+    // 警告に出したい文字
+    const MSG = "⚠️ 画面幅が狭いため、表示が崩れる可能性があります";
+
     const initWarning = () => {
-        let warningEl = document.getElementById('mobile-warning');
-        
-        // 1. HTMLに要素がなければ作成、あれば中身を書き換え
-        if (!warningEl) {
-            warningEl = document.createElement('div');
-            warningEl.id = 'mobile-warning';
-            document.body.appendChild(warningEl);
+        let warning = document.getElementById('mobile-warning');
+
+        // 1. もしHTMLに要素がなければ作成
+        if (!warning) {
+            warning = document.createElement('div');
+            warning.id = 'mobile-warning';
+            document.body.appendChild(warning);
         }
-        
-        // 2. 文字と閉じるボタンを強制セット
-        warningEl.innerHTML = `
-            <span style="flex:1">${WARNING_TEXT}</span>
-            <button id="mobile-warning-close" style="background:rgba(0,0,0,0.2); border:none; color:white; width:24px; height:24px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:16px;">×</button>
+
+        // 2. 文字とボタンを注入（HTMLが空でもこれで解決）
+        warning.innerHTML = `
+            <span style="flex:1">${MSG}</span>
+            <button id="mobile-warning-close" style="background:rgba(0,0,0,0.2); border:none; color:white; width:24px; height:24px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center;">×</button>
         `;
 
-        // 3. スタイルを強制適用（!important）
-        const setStyle = (prop, val) => warningEl.style.setProperty(prop, val, 'important');
+        // 3. JSから直接「最強のスタイル」を当てる（!important付き）
+        const set = (p, v) => warning.style.setProperty(p, v, 'important');
         
         const styles = {
-            'position': 'fixed',
-            'bottom': '20px',
-            'right': '20px',
-            'background': 'rgba(255, 59, 48, 0.95)', // iOS風の赤
-            'color': 'white',
-            'padding': '12px 18px',
-            'border-radius': '12px',
-            'z-index': '9999999',
-            'font-size': '14px',
-            'font-weight': 'bold',
-            'box-shadow': '0 8px 32px rgba(0,0,0,0.4)',
-            'backdrop-filter': 'blur(10px)',
-            '-webkit-backdrop-filter': 'blur(10px)',
-            'border': '1px solid rgba(255,255,255,0.2)',
-            'display': 'none', // 最初は隠す
-            'align-items': 'center',
-            'gap': '12px',
-            'max-width': '300px',
-            'line-height': '1.4',
-            'font-family': '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+            'position': 'fixed', 'bottom': '20px', 'right': '20px',
+            'background': 'rgba(255, 59, 48, 0.95)', 'color': 'white',
+            'padding': '12px 18px', 'border-radius': '12px', 'z-index': '9999999',
+            'font-size': '14px', 'font-weight': 'bold', 'box-shadow': '0 8px 32px rgba(0,0,0,0.4)',
+            'backdrop-filter': 'blur(10px)', 'display': 'none', 'align-items': 'center', 'gap': '12px'
         };
+        for (const s in styles) set(s, styles[s]);
 
-        for (const [prop, val] of Object.entries(styles)) {
-            setStyle(prop, val);
-        }
-
-        // 4. 表示・非表示の判定ロジック
-        const checkSize = () => {
+        // 4. サイズ判定
+        const check = () => {
             if (window.innerWidth <= 1024) {
-                setStyle('display', 'flex');
+                set('display', 'flex');
             } else {
-                setStyle('display', 'none');
+                set('display', 'none');
             }
         };
 
-        window.addEventListener('resize', checkSize);
-        checkSize();
+        window.addEventListener('resize', check);
+        check();
 
-        // 5. 閉じるボタンの動作
-        document.getElementById('mobile-warning-close').onclick = (e) => {
-            e.preventDefault();
-            setStyle('display', 'none');
-            window.removeEventListener('resize', checkSize);
-        };
+        // 5. 閉じるボタンの動作を再設定
+        const closeBtn = document.getElementById('mobile-warning-close');
+        if (closeBtn) {
+            closeBtn.onclick = () => {
+                set('display', 'none');
+                window.removeEventListener('resize', check); // 閉じた後は出さない
+            };
+        }
     };
 
-    // 実行
+    // 実行（読み込みタイミングを逃さないようにする）
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initWarning);
     } else {
