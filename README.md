@@ -33,4 +33,6 @@ Logicool社の[MixLine](https://gaming.logicool.co.jp/ja-jp/software/mixline)を
 
 - 表示サイズを小さくした際に、UI崩れが発生する。
 
+- Ipadのような小さい画面(横画面)で表示したときに案内放送の項目が崩れてしまう。
+
 <img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/37c033a4-5e99-4075-9278-9f3f755994ef" />
