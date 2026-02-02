@@ -51,3 +51,30 @@ self.addEventListener('fetch', (event) => {
     })
   );
 });
+
+// 拡張機能のエラーの根絶
+self.addEventListener('fetch', (event) => {
+  if (!event.request.url.startsWith('http')) return;
+
+  event.respondWith(
+    caches.match(event.request).then((cachedResponse) => {
+      if (cachedResponse) return cachedResponse;
+
+      return fetch(event.request).then((networkResponse) => {
+        // 正常なレスポンス（200 OK）だけをキャッシュに保存
+        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
+          return networkResponse;
+        }
+
+        const responseToCache = networkResponse.clone();
+        caches.open(CACHE_NAME).then((cache) => {
+          cache.put(event.request, responseToCache);
+        });
+
+        return networkResponse;
+      }).catch(() => {
+        // ネットワークエラー時の保険
+      });
+    })
+  );
+});
