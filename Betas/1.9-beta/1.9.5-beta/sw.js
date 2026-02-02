@@ -1,4 +1,4 @@
-const VERSION = 'v1.9.5'; // 設定メニューとオフライン対応強化
+const VERSION = 'v1.9.5-1'; // 設定メニューとオフライン対応強化
 const CACHE_NAME = `kamohara-${VERSION}`;
 const ASSETS = [
   './',
