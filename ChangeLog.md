@@ -20,3 +20,5 @@
 ## 2025/2/2
 - manifest.jsonで指定されているiconの追加
 - manifest.jsonのiconのパスの修正
+- sw.jsでif文追加
+→だけど効果がなかった。
