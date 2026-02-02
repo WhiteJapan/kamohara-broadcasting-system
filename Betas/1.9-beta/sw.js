@@ -6,7 +6,6 @@ const ASSETS = [
   './style.css',
   './script.js',
   './manifest.json',
-  './Wallpaper.png',
   './l_w.png',
   './d_w.png'
 ];
