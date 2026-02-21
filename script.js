@@ -1,7 +1,5 @@
 const DB = {
     STATIONS: [
-        { id: "018", txt: "長町..各駅" },
-        { id: "019", txt: "長町から各駅" },
         { id: "020", txt: "三田" },
         { id: "021", txt: "横河" },
         { id: "022", txt: "荒川" },
@@ -16,42 +14,53 @@ const DB = {
         { id: "031", txt: "南流山" },
         { id: "032", txt: "岩富" },
         { id: "033", txt: "山栄" },
+        { id: "110", txt: "杜せきのした" },
+        { id: "111", txt: "美田園" },
+        { id: "112", txt: "仙台空港" },
     ],
     TRAIN_INFO: [
         { id: "001", txt: "今日も鴨原..." },
         { id: "002", txt: "ご乗車..." },
-        { id: "003", txt: "快速" },
-        { id: "004", txt: "区快" },
-        { id: "005", txt: "各駅" },
+        { id: "100", txt: "快速" },
+        { id: "099", txt: "区快" },
+        { id: "101", txt: "各駅" },
         { id: "006", txt: "この電車は" },
         { id: "007", txt: "ワンマンカー" },
+        { id: "014", txt: "です" },
+        { id: "015", txt: "途中の停車駅" },
+        { id: "016", txt: "終点" },
+        { id: "017", txt: "順に停車..." },
+        { id: "093", txt: "各駅に停車" },
         { id: "008", txt: "三田行き" },
         { id: "009", txt: "長町行き" },
         { id: "010", txt: "長塚行き" },
         { id: "011", txt: "陸今行き" },
         { id: "012", txt: "名取行き" },
         { id: "013", txt: "山栄行き" },
-        { id: "014", txt: "です" },
-        { id: "015", txt: "途中の停車..." },
-        { id: "016", txt: "終点..." },
-        { id: "017", txt: "の順に停車..." },
-        { id: "096", txt: "各駅に停車" }
+        { id: "113", txt: "美田園行き" },
+        { id: "114", txt: "仙台空港行き" },
+        { id: "098", txt: "仙アクセス" },
+        { id: "097", txt: "長塚線" },
+
     ],
     HI: [
-        { name: "三田", next: "034", soon: "035", canBeTerm: true, not: false },
-        { name: "横河", next: "036", soon: "037", canBeTerm: false, not: false },
-        { name: "荒川", next: "038", soon: "039", canBeTerm: false, not: false },
-        { name: "長町", next: "040", soon: "041", canBeTerm: true, terminalNext: "042", terminalSoon: "043", not: false },
-        { name: "立町", next: "044", soon: "045", canBeTerm: false, not: false },
-        { name: "長塚", next: "046", soon: "047", canBeTerm: true, terminalNext: "048", terminalSoon: "049", not: false },
-        { name: "松山", next: "050", soon: "051", canBeTerm: false, not: false },
-        { name: "陸前今庄", next: "052", soon: "053", canBeTerm: true, terminalNext: "054", terminalSoon: "055", not: false },
-        { name: "今庄ランド前", next: "056", soon: "057", canBeTerm: false, not: false },
-        { name: "東名取", next: "058", soon: "059", canBeTerm: false, not: true },
-        { name: "名取", next: "060", soon: "061", canBeTerm: true, terminalNext: "062", terminalSoon: "063", not: false },
-        { name: "南流山", next: "064", soon: "065", canBeTerm: false, not: false },
-        { name: "岩富", next: "066", soon: "067", canBeTerm: false, not: false },
-        { name: "山栄", next: "068", soon: "069", canBeTerm: true, not: false }
+        { name: "三田", line: "長塚線", next: "034", soon: "035", canBeTerm: true, not: false },
+        { name: "横河", line: "長塚線", next: "036", soon: "037", canBeTerm: false, not: false },
+        { name: "荒川", line: "長塚線", next: "038", soon: "039", canBeTerm: false, not: false },
+        { name: "長町", line: "長塚線", next: "040", soon: "041", canBeTerm: true, terminalNext: "042", terminalSoon: "043", not: false },
+        { name: "立町", line: "長塚線", next: "044", soon: "045", canBeTerm: false, not: false },
+        { name: "長塚", line: "長塚線", next: "046", soon: "047", canBeTerm: true, terminalNext: "048", terminalSoon: "049", not: false },
+        { name: "松山", line: "長塚線", next: "050", soon: "051", canBeTerm: false, not: false },
+        { name: "陸前今庄", line: "長塚線", next: "052", soon: "053", canBeTerm: true, terminalNext: "054", terminalSoon: "055", not: false },
+        { name: "今庄ランド前", line: "長塚線", next: "056", soon: "057", canBeTerm: false, not: false },
+        { name: "東名取", line: "長塚線", next: "058", soon: "059", canBeTerm: false, not: true },
+        { name: "名取", line: "長塚線", next: "060", soon: "061", canBeTerm: true, terminalNext: "062", terminalSoon: "063", not: false },
+        { name: "南流山", line: "長塚線", next: "064", soon: "065", canBeTerm: false, not: false },
+        { name: "岩富", line: "長塚線", next: "066", soon: "067", canBeTerm: false, not: false },
+        { name: "山栄", line: "長塚線", next: "068", soon: "069", canBeTerm: true, not: false },
+        { name: "杜せきのした", line: "鴨原空港アクセス線", next: "102", soon: "103", canBeTerm: false, not: false },
+        { name: "美田園", line: "鴨原空港アクセス線", next: "104", soon: "105", canBeTerm: true, not: false, terminalNext: "106", terminalSoon: "107"},
+        { name: "鴨原空港", line: "鴨原空港アクセス線", next: "108", soon: "109", canBeTerm: true, not: false },
     ],
     EF: [
         { id: "072", txt: "出口,右" },
@@ -448,13 +457,24 @@ document.addEventListener('DOMContentLoaded', () => {
     // 設定表
     const hiBody = document.getElementById('station-master-body');
     if (hiBody) {
+        let currentLine = "";
         DB.HI.forEach((st, i) => {
+            // Line Header
+            if (st.line && st.line !== currentLine) {
+                currentLine = st.line;
+                const headerRow = document.createElement('tr');
+                headerRow.className = "line-header-row";
+                headerRow.innerHTML = `<td colspan="3" class="line-header-cell">${currentLine}</td>`;
+                hiBody.appendChild(headerRow);
+            }
+
             const row = document.createElement('tr');
+            row.className = "station-row-item";
 
             if (st.not) {
                 // not: true の場合、駅名のみ表示し、停車・終着列全体に横棒
                 row.innerHTML = `<td style="font-weight:bold;">${st.name}</td>
-                                 <td colspan="2" style="text-align:center; vertical-align:middle; padding: 0 8px;">
+                                 <td colspan="2" style="text-align:center; vertical-align:middle; padding: 10px 8px;">
                                     <div style="width: 100%; height: 26px; background: rgba(255, 255, 255, 0.05); border-radius: 13px; display: flex; align-items: center; justify-content: center; color: rgba(255, 255, 255, 0.4); font-size: 11px; font-weight: 800;">—</div>
                                  </td>`;
             } else {

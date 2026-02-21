@@ -1193,6 +1193,7 @@ body.ui-hidden .content-grid {
     display: flex;
     gap: 8px;
     align-items: center;
+    margin-top: 6px;
 }
 
 .btn-util-small {
@@ -2750,3 +2751,26 @@ input:checked+.checkmark::after {
 .btn-text-danger:hover {
     background: rgba(255, 59, 48, 0.1);
 }
+
+/* Station List Section Header (Mac Style) */
+.line-header-row {
+    pointer-events: none;
+}
+
+.line-header-cell {
+    padding: 20px 8px 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: transparent;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="dark"] .line-header-cell {
+    color: rgba(255, 255, 255, 0.6);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Unified padding, previous extra padding rule removed */
