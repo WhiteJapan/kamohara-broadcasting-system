@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<link rel="icon" href="favicon.png">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>鴨原電鉄自動放送</title>
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Noto+Sans+JP:wght@400;700;900&display=swap"
+        rel="stylesheet">
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js');
+        }
+    </script>
+</head>
+
+<body>
+    <div class="bg-image-layer"></div>
+    <!-- Startup Warning Modal -->
+    <div id="warningModal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-content-wrapper">
+                <div class="modal-icon">⚠️</div>
+                <div class="modal-text-content">
+                    <h1 class="modal-title">走行中注視禁止</h1>
+                    <p class="modal-text">
+                        運転中の画面注視は非常に危険です。<br>
+                        事故防止のため、案内放送以外の操作は、停車中に行ってください。
+                    </p>
+                </div>
+            </div>
+            <div style="display: flex; justify-content: center; margin-top: 24px;">
+                <button id="modalConfirmBtn" class="btn-play-hero" style="min-width: 200px;">了解しました</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <header class="app-header">
+            <div class="brand">
+                <div class="brand-logo">KBS</div>
+                <div class="brand-text">
+                    <span class="brand-sub">Kamohara Electric Railway</span>
+                    <span class="brand-main">自動放送システム</span>
+                </div>
+            </div>
+            <div class="header-controls">
+                <button id="settings-btn" class="btn-icon" title="設定">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path
+                            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                        </path>
+                    </svg>
+                </button>
+                <button id="ui-toggle-btn" class="btn-icon" title="UIを表示/非表示">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M2.5 12c0 0 4.5-8 9.5-8s9.5 8 9.5 8-4.5 8-9.5 8-9.5-8-9.5-8z"></path>
+                        <circle cx="12" cy="12" r="3.5"></circle>
+                    </svg>
+                </button>
+                <div id="clock" class="digital-clock">00:00:00</div>
+            </div>
+        </header>
+
+        <main class="content-grid">
+            <!-- Sidebar: Configuration -->
+            <aside class="side-panel">
+                <div class="card card-config">
+                    <div class="card-header-flex">
+                        <h2 class="card-title">停車駅</h2>
+                        <div class="header-actions">
+                            <button class="btn-util-small" onclick="toggleAllStops(true)">全停車</button>
+                            <button class="btn-util-small" onclick="toggleAllStops(false)">全通過</button>
+                        </div>
+                    </div>
+                    <div class="card-content scroll-v">
+                        <div class="config-section">
+                            <table class="master-table">
+                                <thead>
+                                    <tr>
+                                        <th>駅名</th>
+                                        <th>停車</th>
+                                        <th>終着</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="station-master-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </aside>
+
+            <!-- Main Content: Builder & Execution -->
+            <div class="main-sections">
+                <section class="card card-builder" id="builderCard">
+                    <div class="card-header-flex">
+                        <div class="title-with-actions">
+                            <h2 class="card-title">放送Builder</h2>
+                        </div>
+                        <div class="builder-actions">
+                            <button class="btn-stop" id="stopBtn">STOP</button>
+                            <button class="btn-play-hero" id="playBtn"><span>▶</span> PLAY</button>
+                        </div>
+                    </div>
+
+                    <div class="builder-expand-content">
+                        <div class="monitor-container">
+                            <div class="lcd-monitor" id="builderDisplay">構成待ち...</div>
+                            <button class="btn-util-floating" id="clearBtn" title="全消去">Clear</button>
+                        </div>
+
+                        <div class="builder-parts scroll-v">
+                            <div class="part-group">
+                                <h3 class="section-label">駅名パーツ (Drag to reorder)</h3>
+                                <div id="builder-stations" class="part-grid"></div>
+                            </div>
+                            <div class="part-group">
+                                <h3 class="section-label">案内パーツ</h3>
+                                <div id="builder-train-info" class="part-grid"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <div id="resizeHandle" class="resize-handle"></div>
+
+                <section class="card card-execution">
+                    <div class="card-header-flex">
+                        <h2 class="card-title">案内放送</h2>
+                        <div class="header-actions">
+                            <button class="btn-util-small" onclick="resetProgress()">リセット</button>
+                            <button class="btn-icon-small" id="sortOrderBtn" title="駅順切り替え">⇅ 昇順</button>
+                        </div>
+                    </div>
+                    <div id="active-station-list" class="execution-list scroll-v"></div>
+                </section>
+            </div>
+
+            <!-- Right Panel: Selection Broadcast -->
+            <aside class="side-panel">
+                <section class="card card-ef">
+                    <h2 class="card-title">選択放送</h2>
+                    <div id="ef-immediate-list" class="ef-grid scroll-v"></div>
+                </section>
+            </aside>
+        </main>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal-overlay">
+        <div class="modal-card settings-card">
+            <div class="settings-container">
+                <!-- Sidebar Navigation -->
+                <div class="settings-sidebar">
+                    <div class="settings-sidebar-header">
+                        <button id="settingsCloseBtn" class="traffic-light-btn close" title="閉じる">×</button>
+                        <h2 class="settings-main-title">設定</h2>
+                    </div>
+                    <nav class="settings-nav">
+                        <button class="settings-nav-item active" data-category="general">
+                            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <circle cx="12" cy="12" r="3"></circle>
+                                <path d="M12 1v6m0 6v6m-5-5h6m6 0h-6"></path>
+                            </svg>
+                            <span>一般</span>
+                        </button>
+                        <button class="settings-nav-item" data-category="appearance">
+                            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <circle cx="12" cy="12" r="5"></circle>
+                                <path
+                                    d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42">
+                                </path>
+                            </svg>
+                            <span>外観</span>
+                        </button>
+                        <button class="settings-nav-item" data-category="audio">
+                            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                            </svg>
+                            <span>音声</span>
+                        </button>
+                        <button class="settings-nav-item" data-category="history">
+                            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                            <span>履歴</span>
+                        </button>
+                        <button class="settings-nav-item" data-category="about">
+                            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="16" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                            </svg>
+                            <span>情報</span>
+                        </button>
+                    </nav>
+                </div>
+
+                <!-- Content Area -->
+                <div class="settings-content">
+                    <div class="settings-toolbar">
+                        <div class="nav-controls">
+                            <button class="nav-btn back" disabled>
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="15 18 9 12 15 6"></polyline>
+                                </svg>
+                            </button>
+                            <button class="nav-btn forward" disabled>
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                </svg>
+                            </button>
+                        </div>
+                        <h2 id="settings-current-title" class="toolbar-title">一般</h2>
+                    </div>
+
+                    <div class="settings-content-body scroll-v">
+                        <!-- General Settings -->
+                        <div class="settings-category active" data-category="general">
+                            <div class="settings-section">
+                                <h3 class="section-label">システム</h3>
+                                <div class="settings-list-group">
+                                    <div class="settings-list-item">
+                                        <span class="list-item-label">起動時の警告を表示しない</span>
+                                        <label class="custom-chk">
+                                            <input type="checkbox" id="skip-warning-check">
+                                            <span class="checkmark stop-sw"></span>
+                                        </label>
+                                    </div>
+                                    <div class="settings-list-item">
+                                        <span class="list-item-label">フルスクリーンで表示</span>
+                                        <label class="custom-chk">
+                                            <input type="checkbox" id="fullscreen-check">
+                                            <span class="checkmark stop-sw"></span>
+                                        </label>
+                                    </div>
+                                    <div class="settings-list-item">
+                                        <span class="list-item-label">アニメーションを減らす</span>
+                                        <label class="custom-chk">
+                                            <input type="checkbox" id="reduce-anim-check">
+                                            <span class="checkmark stop-sw"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="settings-section">
+                                <button id="reset-settings-btn" class="btn-danger-outline">設定をリセット</button>
+                            </div>
+                        </div>
+
+                        <!-- Appearance Settings -->
+                        <div class="settings-category" data-category="appearance">
+                            <div class="settings-section">
+                                <div class="theme-selector-modern">
+                                    <div class="theme-card" data-value="light">
+                                        <div class="theme-preview light-preview">
+                                            <div class="preview-window">
+                                                <div class="p-window-menu"></div>
+                                                <div class="p-window-content">
+                                                    <div class="p-window-sidebar"></div>
+                                                    <div class="p-window-main"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <span class="label">ライト</span>
+                                    </div>
+                                    <div class="theme-card" data-value="dark">
+                                        <div class="theme-preview dark-preview">
+                                            <div class="preview-window">
+                                                <div class="p-window-menu"></div>
+                                                <div class="p-window-content">
+                                                    <div class="p-window-sidebar"></div>
+                                                    <div class="p-window-main"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <span class="label">ダーク</span>
+                                    </div>
+                                    <div class="theme-card" data-value="auto">
+                                        <div class="theme-preview auto-preview">
+                                            <div class="preview-window">
+                                                <div class="p-window-menu"></div>
+                                                <div class="p-window-content">
+                                                    <div class="p-window-sidebar"></div>
+                                                    <div class="p-window-main"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <span class="label">自動</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Audio Settings -->
+                        <div class="settings-category" data-category="audio">
+                            <!-- Audio Settings with macOS Sliders -->
+                            <div class="settings-section">
+                                <div class="settings-slider-group">
+                                    <div class="slider-header">
+                                        <div class="slider-label-container">
+                                            <span class="slider-icon">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                    stroke-linejoin="round">
+                                                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                                                    <path
+                                                        d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07">
+                                                    </path>
+                                                </svg>
+                                            </span>
+                                            <span class="slider-label">マスター音量</span>
+                                        </div>
+                                        <span id="volume-val" class="slider-value">100%</span>
+                                    </div>
+                                    <input type="range" id="volume-range" min="0" max="100" value="100"
+                                        class="styled-range">
+                                </div>
+                            </div>
+                            <div class="settings-section">
+                                <div class="settings-slider-group">
+                                    <div class="slider-header">
+                                        <div class="slider-label-container">
+                                            <span class="slider-icon">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                    stroke-linejoin="round">
+                                                    <polygon points="13 19 22 12 13 5 13 19"></polygon>
+                                                    <polygon points="2 19 11 12 2 5 2 19"></polygon>
+                                                </svg>
+                                            </span>
+                                            <span class="slider-label">再生速度</span>
+                                        </div>
+                                        <span id="speed-val" class="slider-value">1.0x</span>
+                                    </div>
+                                    <input type="range" id="speed-range" min="50" max="150" step="10" value="100"
+                                        class="styled-range">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- History Settings -->
+                        <div class="settings-category" data-category="history">
+                            <div class="settings-section">
+                                <div class="section-header-flex"
+                                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 0 16px;">
+                                    <h3 class="section-label" style="margin: 0; padding: 0;">放送履歴</h3>
+                                    <button id="clear-history-btn" class="btn-util-small"
+                                        style="margin: 0; color: #FF3B30; border-color: rgba(255, 59, 48, 0.3); background: rgba(255, 59, 48, 0.05);">すべて消去</button>
+                                </div>
+                                <div id="broadcast-history" class="settings-info-grid">
+                                    <div class="history-placeholder">履歴はありません</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- About Settings -->
+                        <div class="settings-category" data-category="about">
+                            <div class="settings-section about-header-container">
+                                <div class="device-icon-wrapper laptop-wrapper">
+                                    <svg class="device-icon" viewBox="0 0 200 170" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <!-- Laptop Screen -->
+                                        <path
+                                            d="M30 40H170C173.314 40 176 42.6863 176 46V125H24V46C24 42.6863 26.6863 40 30 40Z"
+                                            fill="#1d1d1f" />
+                                        <path
+                                            d="M30 40H170C173.314 40 176 42.6863 176 46V125H24V46C24 42.6863 26.6863 40 30 40Z"
+                                            fill="url(#screen-gradient)" opacity="0.9" />
+                                        <path
+                                            d="M30 40H170C173.314 40 176 42.6863 176 46V125H24V46C24 42.6863 26.6863 40 30 40Z"
+                                            stroke="#3a3a3c" stroke-width="2" />
+                                        <!-- Base Top -->
+                                        <path
+                                            d="M12 125H188C190.209 125 192 126.791 192 129V133H8V129C8 126.791 9.79086 125 12 125Z"
+                                            fill="#e2e2e4" stroke="#d2d2d7" />
+                                        <!-- Notch -->
+                                        <path
+                                            d="M92 40H108V46C108 47.1046 107.105 48 106 48H94C92.8954 48 92 47.1046 92 46V40Z"
+                                            fill="#000" />
+
+                                        <defs>
+                                            <linearGradient id="screen-gradient" x1="30" y1="20" x2="170" y2="105"
+                                                gradientUnits="userSpaceOnUse">
+                                                <stop stop-color="#007AFF" />
+                                                <stop offset="1" stop-color="#64D2FF" />
+                                            </linearGradient>
+                                        </defs>
+                                    </svg>
+                                </div>
+                                <h2 class="system-name-large">Kamohara Broadcasting System</h2>
+                                <p class="system-chip-info">App Version 2.0</p>
+                            </div>
+
+                            <div class="settings-section">
+                                <h3 class="section-label">詳細情報</h3>
+                                <div class="settings-info-grid">
+                                    <div class="info-item">
+                                        <span class="info-label">レンダリング</span>
+                                        <span class="info-value">Canvas / WebGL</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">音声エンジン</span>
+                                        <span class="info-value">Web Audio API</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">音声合成</span>
+                                        <span class="info-value">Takoe 七日週_T2モデル</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">開発</span>
+                                        <span class="info-value">WhiteJPN & Gemini</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">背景画像</span>
+                                        <span class="info-value">Yellow_mqo</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="settings-section github-btn-section"
+                                style="margin-top: -12px; display: flex; justify-content: center;">
+                                <a href="https://github.com/WhiteJapan/kamohara-broadcasting-system" target="_blank"
+                                    class="btn-github">
+                                    <svg class="btn-icon-svg" viewBox="0 0 24 24" width="16" height="16"
+                                        fill="currentColor">
+                                        <path
+                                            d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                                    </svg>
+                                    GitHub リポジトリ
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Warning -->
+    <div id="mobile-warning">
+        <span>⚠️ 画面幅が狭いため、表示が崩れる可能性があります</span>
+        <button id="mobile-warning-close">×</button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
