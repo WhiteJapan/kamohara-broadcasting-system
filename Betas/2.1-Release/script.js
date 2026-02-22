@@ -14,20 +14,9 @@ const DB = {
         { id: "031", txt: "南流山" },
         { id: "032", txt: "岩富" },
         { id: "033", txt: "山栄" },
-        // 仙台空港アクセス線
         { id: "110", txt: "杜せきのした" },
         { id: "111", txt: "美田園" },
         { id: "112", txt: "仙台空港" },
-        // 北東線
-        { id: "139", txt: "日東" },
-        { id: "140", txt: "元山" },
-        { id: "141", txt: "葉西口" },
-        { id: "142", txt: "大和日" },
-        { id: "143", txt: "清見" },
-        { id: "144", txt: "堺川" },
-        { id: "145", txt: "上岡台" },
-        { id: "146", txt: "本郷" },
-        { id: "147", txt: "千里が丘" },
     ],
     TRAIN_INFO: [
         { id: "001", txt: "今日も鴨原..." },
@@ -50,13 +39,8 @@ const DB = {
         { id: "013", txt: "山栄行き" },
         { id: "113", txt: "美田園行き" },
         { id: "114", txt: "仙台空港行き" },
-        { id: "150", txt: "葉西口行き" },
-        { id: "151", txt: "上岡台行き" },
-        { id: "152", txt: "千里が丘行き" },
         { id: "098", txt: "仙アクセス" },
         { id: "097", txt: "長塚線" },
-        { id: "115", txt: "北東線" },
-        { id: "138", txt: "直通" },
 
     ],
     HI: [
@@ -73,21 +57,10 @@ const DB = {
         { name: "名取", line: "長塚線", next: "060", soon: "061", canBeTerm: true, terminalNext: "062", terminalSoon: "063", not: false },
         { name: "南流山", line: "長塚線", next: "064", soon: "065", canBeTerm: false, not: false },
         { name: "岩富", line: "長塚線", next: "066", soon: "067", canBeTerm: false, not: false },
-        { name: "山栄", line: "長塚線", next: "148", soon: "149", canBeTerm: true, terminalNext: "068", terminalSoon: "069", not: false, },
-        // 北東線 (Hokuto Line) - 仮データ
-        { name: "日東", line: "北東線", next: "116", soon: "117", canBeTerm: true, not: false },
-        { name: "元山", line: "北東線", next: "118", soon: "119", canBeTerm: false, not: false },
-        { name: "葉西口", line: "北東線", next: "120", soon: "121", canBeTerm: true, not: false, terminalNext: "122", terminalSoon: "123" },
-        { name: "大和日", line: "北東線", next: "124", soon: "125", canBeTerm: true, not: false },
-        { name: "清見", line: "北東線", next: "126", soon: "127", canBeTerm: false, not: false },
-        { name: "堺川", line: "北東線", next: "128", soon: "129", canBeTerm: false, not: false },
-        { name: "上岡台", line: "北東線", next: "130", soon: "131", canBeTerm: true, not: false, terminalNext: "132", terminalSoon: "133" },
-        { name: "本郷", line: "北東線", next: "134", soon: "135", canBeTerm: false, not: false },
-        { name: "千里ヶ丘", line: "北東線", next: "136", soon: "137", canBeTerm: true, not: false },
-        // 鴨原空港アクセス線
+        { name: "山栄", line: "長塚線", next: "068", soon: "069", canBeTerm: true, not: false },
         { name: "杜せきのした", line: "鴨原空港アクセス線", next: "102", soon: "103", canBeTerm: false, not: false },
-        { name: "美田園", line: "鴨原空港アクセス線", next: "104", soon: "105", canBeTerm: true, not: false, terminalNext: "106", terminalSoon: "107" },
-        { name: "仙台空港", line: "鴨原空港アクセス線", next: "108", soon: "109", canBeTerm: true, not: false },
+        { name: "美田園", line: "鴨原空港アクセス線", next: "104", soon: "105", canBeTerm: true, not: false, terminalNext: "106", terminalSoon: "107"},
+        { name: "鴨原空港", line: "鴨原空港アクセス線", next: "108", soon: "109", canBeTerm: true, not: false },
     ],
     EF: [
         { id: "072", txt: "出口,右" },
@@ -233,7 +206,6 @@ function addHistory(txt) {
 // --- 再生ロジック ---
 let buildQueue = [];
 let hiDisplayOrder = 1; // 1: 昇順, -1: 降順
-let currentLineTab = "長塚線"; // 初期表示路線
 let isPlaying = false;
 const player = new Audio();
 
@@ -349,7 +321,10 @@ function updateBuilderDisplay() {
 
 // --- Station Control ---
 function updateTerminalSwitches() {
-    let selectedIdx = DB.HI.findIndex(st => st.term);
+    let selectedIdx = -1;
+    DB.HI.forEach((_, i) => {
+        if (document.getElementById(`hi-term-${i}`)?.checked) selectedIdx = i;
+    });
     DB.HI.forEach((st, i) => {
         const sw = document.getElementById(`hi-term-${i}`);
         if (sw && st.canBeTerm) sw.disabled = (selectedIdx !== -1 && selectedIdx !== i);
@@ -358,12 +333,9 @@ function updateTerminalSwitches() {
 }
 
 function toggleAllStops(value) {
-    DB.HI.forEach((st, i) => {
-        if (st.line === currentLineTab) {
-            st.stop = value; // データモデルを更新
-            const sw = document.getElementById(`hi-stop-${i}`);
-            if (sw) sw.checked = value;
-        }
+    DB.HI.forEach((_, i) => {
+        const sw = document.getElementById(`hi-stop-${i}`);
+        if (sw) sw.checked = value;
     });
     refreshActiveHI();
 }
@@ -396,9 +368,8 @@ function refreshActiveHI() {
 
         const isStopInput = document.getElementById(`hi-stop-${i}`);
         const isTermInput = document.getElementById(`hi-term-${i}`);
-        // 状態モデルから取得（入力要素がない場合はデータモデルの状態を使用する。後述のrenderStationMasterで同期させる）
-        const isStop = isStopInput ? isStopInput.checked : (st.stop !== undefined ? st.stop : false);
-        const isTerm = isTermInput ? isTermInput.checked : (st.term !== undefined ? st.term : false);
+        const isStop = isStopInput ? isStopInput.checked : true; // Default to true (停車) if input not found
+        const isTerm = isTermInput ? isTermInput.checked : false;
 
         const isActive = currentStatus.index === i;
         const isCompleted = completedStations.has(i);
@@ -422,11 +393,9 @@ function refreshActiveHI() {
             statusBadge = `<span class="pass-label">通過済み</span>`;
         }
 
-        const lineSymbol = st.line === '長塚線' ? 'N' : (st.line === '北東線' ? 'H' : 'A');
         row.innerHTML = `
             <div class="st-name-area">
                 ${statusBadge}
-                <div class="st-line-label line-${st.line === '長塚線' ? 'n' : (st.line === '北東線' ? 'h' : 'a')}">${lineSymbol}</div>
                 <div class="st-name-main">
                     ${st.name}${isTerm ? '<span class="term-label">終点</span>' : ''}
                 </div>
@@ -476,12 +445,6 @@ function resetProgress() {
 
 // --- Main Init ---
 document.addEventListener('DOMContentLoaded', () => {
-    // 全駅データの初期化
-    DB.HI.forEach(st => {
-        if (st.stop === undefined) st.stop = false;
-        if (st.term === undefined) st.term = false;
-    });
-
     loadSettings();
 
     // 警告モーダル
@@ -491,73 +454,43 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('modalConfirmBtn').onclick = () => modal.classList.remove('active');
     }
 
-    // 路線タブの生成
-    const lineTabsContainer = document.getElementById('line-tabs');
-    if (lineTabsContainer) {
-        // インジケーターの追加
-        const indicator = document.createElement('div');
-        indicator.className = 'line-tab-indicator';
-        lineTabsContainer.appendChild(indicator);
-
-        const lineOrder = ['長塚線', '北東線', '鴨原空港アクセス線'];
-        const lines = lineOrder.filter(line => DB.HI.some(st => st.line === line));
-        lines.forEach((line, idx) => {
-            const btn = document.createElement('button');
-            btn.className = `line-tab ${line === currentLineTab ? 'active' : ''}`;
-            btn.innerText = line;
-            btn.onclick = (e) => {
-                currentLineTab = line;
-                document.querySelectorAll('.line-tab').forEach(b => b.classList.toggle('active', b.innerText === line));
-                updateTabIndicator(btn);
-                renderStationMaster();
-            };
-            lineTabsContainer.appendChild(btn);
-            if (line === currentLineTab) {
-                // 初期位置
-                setTimeout(() => updateTabIndicator(btn), 0);
-            }
-        });
-    }
-
-    function updateTabIndicator(activeBtn) {
-        const indicator = document.querySelector('.line-tab-indicator');
-        if (!indicator) return;
-        indicator.style.width = activeBtn.offsetWidth + 'px';
-        indicator.style.left = activeBtn.offsetLeft + 'px';
-    }
-
-    // 設定表の描画関数
-    function renderStationMaster() {
-        const hiBody = document.getElementById('station-master-body');
-        if (!hiBody) return;
-        hiBody.innerHTML = "";
-
+    // 設定表
+    const hiBody = document.getElementById('station-master-body');
+    if (hiBody) {
+        let currentLine = "";
         DB.HI.forEach((st, i) => {
-            if (st.line !== currentLineTab) return;
+            // Line Header
+            if (st.line && st.line !== currentLine) {
+                currentLine = st.line;
+                const headerRow = document.createElement('tr');
+                headerRow.className = "line-header-row";
+                headerRow.innerHTML = `<td colspan="3" class="line-header-cell">${currentLine}</td>`;
+                hiBody.appendChild(headerRow);
+            }
 
             const row = document.createElement('tr');
             row.className = "station-row-item";
 
             if (st.not) {
+                // not: true の場合、駅名のみ表示し、停車・終着列全体に横棒
                 row.innerHTML = `<td style="font-weight:bold;">${st.name}</td>
                                  <td colspan="2" style="text-align:center; vertical-align:middle; padding: 10px 8px;">
                                     <div style="width: 100%; height: 26px; background: rgba(255, 255, 255, 0.05); border-radius: 13px; display: flex; align-items: center; justify-content: center; color: rgba(255, 255, 255, 0.4); font-size: 11px; font-weight: 800;">—</div>
                                  </td>`;
             } else {
-                const stopHtml = `<label class="custom-chk"><input type="checkbox" id="hi-stop-${i}" ${st.stop ? 'checked' : ''} onchange="DB.HI[${i}].stop=this.checked; refreshActiveHI()"><span class="checkmark stop-sw"></span></label>`;
+                // 通常の場合
+                const stopHtml = `<label class="custom-chk"><input type="checkbox" id="hi-stop-${i}" onchange="refreshActiveHI()"><span class="checkmark stop-sw"></span></label>`;
                 const termHtml = st.canBeTerm
-                    ? `<label class="custom-chk"><input type="checkbox" id="hi-term-${i}" ${st.term ? 'checked' : ''} onchange="DB.HI[${i}].term=this.checked; updateTerminalSwitches()"><span class="checkmark term-sw"></span></label>`
+                    ? `<label class="custom-chk"><input type="checkbox" id="hi-term-${i}" onchange="updateTerminalSwitches()"><span class="checkmark term-sw"></span></label>`
                     : `<span class="term-disabled-text">—</span>`;
                 row.innerHTML = `<td style="font-weight:bold;">${st.name}</td>
                                  <td>${stopHtml}</td>
                                  <td>${termHtml}</td>`;
             }
+
             hiBody.appendChild(row);
         });
     }
-
-    // 初期表示
-    renderStationMaster();
 
     // Builderパーツ
     const createBtn = (id, data) => {
@@ -614,8 +547,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!isResizing) return;
             const clientY = e.touches ? e.touches[0].clientY : e.clientY;
             const mainRect = document.querySelector('.main-sections').getBoundingClientRect();
-            // ハンドルが常に中央に来るように、最初はCSSのflex: 1に任せる
-            // 操作が始まったら、現在のマウス位置に基づいて高さを固定する
             let newHeight = Math.max(80, Math.min(mainRect.height - 100, clientY - mainRect.top));
             builderCard.style.height = newHeight + 'px';
             builderCard.style.flex = 'none';
