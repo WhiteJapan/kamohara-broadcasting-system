@@ -79,7 +79,9 @@ const DB = {
         { name: "Dummy", line: "北東線", next: "000", soon: "000", canBeTerm: true},
 
         // 鴨原空港アクセス線
-        { name: "Dummy", line: "鴨原空港アクセス線", next: "000", soon: "000", canBeTerm: true,}
+        { name: "Dummy", line: "名浜線", next: "000", soon: "000", canBeTerm: true,}
+        { name: "Dummy", line: "名浜線", next: "000", soon: "000", canBeTerm: true,}
+        { name: "Dummy", line: "名浜線", next: "000", soon: "000", canBeTerm: true,}
     ],
     EF: [
         { id: "072", txt: "出口,右" },
