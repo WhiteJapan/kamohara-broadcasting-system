@@ -19,15 +19,12 @@ const DB = {
         { id: "111", txt: "美田園" },
         { id: "112", txt: "仙台空港" },
         // 北東線
-        { id: "139", txt: "日東" },
-        { id: "140", txt: "元山" },
-        { id: "141", txt: "葉西口" },
-        { id: "142", txt: "大和日" },
-        { id: "143", txt: "清見" },
-        { id: "144", txt: "堺川" },
-        { id: "145", txt: "上岡台" },
-        { id: "146", txt: "本郷" },
-        { id: "147", txt: "千里が丘" },
+        { id: "000", txt: "日東" },
+        { id: "000", txt: "元山" },
+        { id: "000", txt: "Dummy" },
+        { id: "000", txt: "Dummy" },
+        { id: "000", txt: "Dummy" },
+        { id: "000", txt: "Dummy" },
     ],
     TRAIN_INFO: [
         { id: "001", txt: "今日も鴨原..." },
@@ -48,12 +45,6 @@ const DB = {
         { id: "011", txt: "陸今行き" },
         { id: "012", txt: "名取行き" },
         { id: "013", txt: "山栄行き" },
-        { id: "113", txt: "美田園行き" },
-        { id: "114", txt: "仙台空港行き" },
-        { id: "150", txt: "葉西口行き" },
-        { id: "151", txt: "上岡台行き" },
-        { id: "152", txt: "千里が丘行き" },
-        { id: "098", txt: "仙アクセス" },
         { id: "097", txt: "長塚線" },
         { id: "115", txt: "北東線" },
         { id: "138", txt: "直通" },
@@ -74,20 +65,21 @@ const DB = {
         { name: "南流山", line: "長塚線", next: "064", soon: "065", canBeTerm: false, not: false },
         { name: "岩富", line: "長塚線", next: "066", soon: "067", canBeTerm: false, not: false },
         { name: "山栄", line: "長塚線", next: "148", soon: "149", canBeTerm: true, terminalNext: "068", terminalSoon: "069", not: false, },
+        
         // 北東線 (Hokuto Line) - 仮データ
         { name: "日東", line: "北東線", next: "116", soon: "117", canBeTerm: true, not: false },
         { name: "元山", line: "北東線", next: "118", soon: "119", canBeTerm: false, not: false },
-        { name: "葉西口", line: "北東線", next: "120", soon: "121", canBeTerm: true, not: false, terminalNext: "122", terminalSoon: "123" },
-        { name: "大和日", line: "北東線", next: "124", soon: "125", canBeTerm: true, not: false },
-        { name: "清見", line: "北東線", next: "126", soon: "127", canBeTerm: false, not: false },
-        { name: "堺川", line: "北東線", next: "128", soon: "129", canBeTerm: false, not: false },
-        { name: "上岡台", line: "北東線", next: "130", soon: "131", canBeTerm: true, not: false, terminalNext: "132", terminalSoon: "133" },
-        { name: "本郷", line: "北東線", next: "134", soon: "135", canBeTerm: false, not: false },
-        { name: "千里ヶ丘", line: "北東線", next: "136", soon: "137", canBeTerm: true, not: false },
+        { name: "Dummy", line: "北東線", next: "000", soon: "000", canBeTerm: true},
+        { name: "Dummy", line: "北東線", next: "000", soon: "000", canBeTerm: true},
+        { name: "Dummy", line: "北東線", next: "000", soon: "000", canBeTerm: true},
+        { name: "Dummy", line: "北東線", next: "000", soon: "000", canBeTerm: true},
+        { name: "Dummy", line: "北東線", next: "000", soon: "000", canBeTerm: true},
+        { name: "Dummy", line: "北東線", next: "000", soon: "000", canBeTerm: true},
+        { name: "Dummy", line: "北東線", next: "000", soon: "000", canBeTerm: true},
+        { name: "Dummy", line: "北東線", next: "000", soon: "000", canBeTerm: true},
+
         // 鴨原空港アクセス線
-        { name: "杜せきのした", line: "鴨原空港アクセス線", next: "102", soon: "103", canBeTerm: false, not: false },
-        { name: "美田園", line: "鴨原空港アクセス線", next: "104", soon: "105", canBeTerm: true, not: false, terminalNext: "106", terminalSoon: "107" },
-        { name: "仙台空港", line: "鴨原空港アクセス線", next: "108", soon: "109", canBeTerm: true, not: false },
+        { name: "Dummy", line: "鴨原空港アクセス線", next: "000", soon: "000", canBeTerm: true,}
     ],
     EF: [
         { id: "072", txt: "出口,右" },
@@ -499,7 +491,7 @@ document.addEventListener('DOMContentLoaded', () => {
         indicator.className = 'line-tab-indicator';
         lineTabsContainer.appendChild(indicator);
 
-        const lineOrder = ['長塚線', '北東線', '鴨原空港アクセス線'];
+        const lineOrder = ['長塚線', '北東線', '名浜線'];
         const lines = lineOrder.filter(line => DB.HI.some(st => st.line === line));
         lines.forEach((line, idx) => {
             const btn = document.createElement('button');
