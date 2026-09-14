@@ -8,7 +8,7 @@ Logicool社の[MixLine](https://gaming.logicool.co.jp/ja-jp/software/mixline)を
 > 周りの迷惑にもなるので、適切な音量にしてください。 
 
 気分的に「自動放送やりたい！」って思ったので勢いで作りました。  
-私はそんな技術とかもクソもないので、geminiといっしょに作りました。  
+私はそんな技術とかもクソもないので、Google Antigravityで作りました。  
 案はほとんど私なんで、自分が作ったことにしてるが！
 
 今年は自分のやりたいことをするということをするということで活動してるんで！  
@@ -17,7 +17,7 @@ Logicool社の[MixLine](https://gaming.logicool.co.jp/ja-jp/software/mixline)を
 随時更新してます！よかったら見に来てね！
 
 ## SpecialThanks
-音声 Takoe:七日週_T2モデル  
+音声 旧バージョンは Takoe:七日週_T2モデル  
 写真 @Yellow-mqo  
 [かもげん](https://discord.gg/kKk475C7wc)
 
