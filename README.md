@@ -16,6 +16,8 @@ Logicool社の[MixLine](https://gaming.logicool.co.jp/ja-jp/software/mixline)を
 
 随時更新してます！よかったら見に来てね！
 
+実はドメインを取得しましてkbs.whitejpn.jpになっています
+
 ## SpecialThanks
 音声 
 最初期バージョン 音読さん
