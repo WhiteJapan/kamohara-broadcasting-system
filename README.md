@@ -1,6 +1,9 @@
 # Kamohara Broadcasting System
 ![Latest Release](https://img.shields.io/github/v/release/WhiteJapan/kamohara-broadcasting-system?color=blue) ![Repo Size](https://img.shields.io/github/repo-size/WhiteJapan/kamohara-broadcasting-system?color=blue) ![Top Language](https://img.shields.io/github/languages/top/WhiteJapan/kamohara-broadcasting-system?color=blue) ![Last Commit](https://img.shields.io/github/last-commit/WhiteJapan/kamohara-broadcasting-system?color=blue)
 
+> [!important]
+> 更新ができていないので一部駅名が正しくないです。
+
 ## Overview
 Logicool社の[MixLine](https://gaming.logicool.co.jp/ja-jp/software/mixline)を通し、ページを開き音声を再生することで車内放送を無理やり流すことができます。  
 > [!Warning]
